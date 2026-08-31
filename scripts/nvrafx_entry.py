@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""NVRAFX — single product entry (one-file Windows EXE).
+"""NVRA — single product entry (one-file Windows EXE).
 
 Internal modules remain god.* / N.U.N.G. architecture.
-Distributed binary name is only NVRAFX.exe (not NUNG.exe, not NVRA.exe).
+Distributed binary name is only NVRA.exe (not NVRAFX.exe, not NUNG.exe).
 
+Product: NVRA | Developer/Publisher: NUNG (identity only — never a credential).
 LIVE capital is BLOCKED by default.
 """
 from __future__ import annotations
@@ -20,10 +21,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-PRODUCT_NAME = "NVRAFX"
+PRODUCT_NAME = "NVRA"
+DEVELOPER_NAME = "NUNG"
 PRODUCT_VERSION = "1.0.0"
 RUNTIME_VERSION = "1.0.0"
-BUILD_ID = "nvrafx-onefile"
+BUILD_ID = "nvra-onefile"
 
 
 def _cli_write(text: str, *, stream: str = "stdout") -> None:
@@ -52,14 +54,15 @@ def _cli_write(text: str, *, stream: str = "stdout") -> None:
 
 def _version_text() -> str:
     return (
-        f"NVRAFX\n"
+        f"NVRA\n"
+        f"Developed by {DEVELOPER_NAME}\n"
         f"Product Version: {PRODUCT_VERSION}\n"
         f"Runtime Version: {RUNTIME_VERSION}\n"
         f"Build ID: {BUILD_ID}\n"
         f"Architecture: N.U.N.G. / GOD (internal)\n"
         f"Default mode: PAPER\n"
         f"Live trading: disabled by default\n"
-        f"Executable: NVRAFX.exe (single product binary)\n"
+        f"Executable: NVRA.exe (single product binary)\n"
     )
 
 
@@ -71,13 +74,14 @@ def cmd_version() -> int:
 def cmd_health() -> int:
     payload = {
         "product": PRODUCT_NAME,
+        "developer": DEVELOPER_NAME,
         "state": "READY",
         "gui_required": False,
         "live_trading_enabled": False,
         "live_authorized": False,
         "autonomous_headless_supported": True,
         "broker_orders_submitted": 0,
-        "executable": "NVRAFX.exe",
+        "executable": "NVRA.exe",
     }
     _cli_write(json.dumps(payload, indent=2) + "\n")
     return 0
@@ -116,7 +120,7 @@ def cmd_check_config() -> int:
 def _run_nung_app(argv: list[str]) -> int:
     from god.app import NungApplication
 
-    parser = argparse.ArgumentParser(prog="NVRAFX")
+    parser = argparse.ArgumentParser(prog="NVRA")
     parser.add_argument("--data-dir", default=str(Path.home() / ".nvrafx"))
     sub = parser.add_subparsers(dest="cmd")
 
@@ -198,8 +202,8 @@ def _run_headless_autostart() -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="NVRAFX",
-        description="NVRAFX — single product runtime (N.U.N.G. architecture, paper/DEMO)",
+        prog="NVRA",
+        description="NVRA — single product runtime (Developed by NUNG; paper/DEMO default)",
     )
     p.add_argument("--version", action="store_true", help="Show product/runtime version")
     p.add_argument("--health", action="store_true", help="Report health (no secrets)")

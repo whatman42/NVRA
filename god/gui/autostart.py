@@ -1,7 +1,9 @@
-"""Windows per-user startup integration for NVRAFX.
+"""Windows per-user startup integration for NVRA.
 
 Uses the standard HKCU Run key. Production command is headless autonomous:
-  NVRAFX.exe --autostart --headless
+  NVRA.exe --autostart --headless
+
+NUNG is the developer/publisher identity only — never a default credential.
 """
 from __future__ import annotations
 
@@ -9,8 +11,8 @@ import os
 import sys
 from pathlib import Path
 
-APP_NAME = "NVRAFX"
-RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+APP_NAME = "NVRA"
+RUN_KEY = r"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 AUTOSTART_ARGUMENT = "--autostart --headless"
 
 
