@@ -1,0 +1,31 @@
+# Locked top-level package ranges for reproducible install intent.
+# Install: pip install -r requirements.lock
+# Prefer constraints.txt together with requirements.txt in CI.
+# Generated for NVRA production CI (2026-08-31). Not a full pip-tools lock.
+
+numpy>=1.26,<2.0
+PyYAML>=6.0,<7
+cryptography>=41,<47
+PySide6>=6.6,<7
+psutil>=5.9,<8
+requests>=2.33.0,<3
+httpx>=0.25,<1
+urllib3>=2.7.0,<3
+ccxt>=4.2,<5
+keyring>=25,<26
+MetaTrader5>=5.0.45; platform_system=="Windows"
+scikit-learn>=1.3,<2
+lightgbm>=4.0,<5
+xgboost>=2.0,<4
+catboost>=1.2,<2
+torch>=2.3,<3.0
+shap>=0.45,<1
+pytest>=7.4,<9
+pytest-asyncio>=0.21,<1
+pytest-cov>=4.1,<7
+pytest-mock>=3.11,<4
+pyinstaller>=6.0,<7
+prometheus-client>=0.20,<1
+google-auth>=2.29,<3
+google-auth-oauthlib>=1.2,<2
+google-api-python-client>=2.130,<3
