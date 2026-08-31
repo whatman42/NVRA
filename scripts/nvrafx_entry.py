@@ -26,6 +26,36 @@ RUNTIME_VERSION = "1.0.0"
 BUILD_ID = "nvrafx-onefile"
 
 
+def _cli_write(text: str, *, stream: str = "stdout") -> None:
+    """Write CLI text without crashing on windowed (console=False) PyInstaller builds.
+
+    On Windows GUI-subsystem executables, stdout/stderr may be detached or
+    invalid. Best-effort write; never raise for missing stream handles.
+    """
+    target = sys.stdout if stream == "stdout" else sys.stderr
+    try:
+        if target is None:
+            return
+        target.write(text)
+        try:
+            target.flush()
+        except (OSError, ValueError, AttributeError):
+            pass
+    except (OSError, ValueError, AttributeError):
+        # Detached / closed / invalid handle — ignore for CLI smoke paths.
+        if stream == "stdout":
+            try:
+                err = sys.stderr
+                if err is not None:
+                    err.write(text)
+                    try:
+                        err.flush()
+                    except (OSError, ValueError, AttributeError):
+                        pass
+            except (OSError, ValueError, AttributeError):
+                pass
+
+
 def _version_text() -> str:
     return (
         f"NVRAFX\n"
@@ -40,7 +70,7 @@ def _version_text() -> str:
 
 
 def cmd_version() -> int:
-    sys.stdout.write(_version_text())
+    _cli_write(_version_text())
     return 0
 
 
@@ -54,7 +84,7 @@ def cmd_health() -> int:
         "broker_orders_submitted": 0,
         "executable": "NVRAFX.exe",
     }
-    sys.stdout.write(json.dumps(payload, indent=2) + "\n")
+    _cli_write(json.dumps(payload, indent=2) + "\n")
     return 0
 
 
@@ -73,7 +103,7 @@ def cmd_check_config() -> int:
             "broker_orders_submitted": 0,
             "product": PRODUCT_NAME,
         }
-        sys.stdout.write(json.dumps(out, indent=2) + "\n")
+        _cli_write(json.dumps(out, indent=2) + "\n")
         return 0 if res.status == ConfigValidationStatus.VALID else 1
     except Exception as exc:
         out = {
@@ -84,7 +114,7 @@ def cmd_check_config() -> int:
             "broker_orders_submitted": 0,
             "product": PRODUCT_NAME,
         }
-        sys.stdout.write(json.dumps(out, indent=2) + "\n")
+        _cli_write(json.dumps(out, indent=2) + "\n")
         return 1
 
 
@@ -158,7 +188,7 @@ def _run_gui(*, autostart_mode: bool = False) -> int:
         from god.gui.main import run_gui
         return run_gui(autostart_mode=autostart_mode)
     except Exception as exc:
-        sys.stderr.write(f"GUI startup failed: {exc}\n")
+        _cli_write(f"GUI startup failed: {exc}\n", stream="stderr")
         return 1
 
 
