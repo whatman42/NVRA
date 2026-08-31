@@ -173,17 +173,24 @@ class InMemoryCredentialStore(CredentialStore):
 def create_credential_store(*, allow_in_memory: bool = False) -> CredentialStore:
     """Factory that selects the appropriate backend.
 
+    Explicit in-memory (tests / controlled non-production):
+        When allow_in_memory=True, always returns InMemoryCredentialStore
+        on every platform, including Windows. Production callers must keep
+        the default allow_in_memory=False.
+
     Production (Windows):
         Uses Windows Credential Manager via the optional 'keyring' package
         when available. Fails closed if the secure backend cannot be used.
 
-    Non-Windows / CI:
-        Returns InMemoryCredentialStore only when allow_in_memory=True.
-        Otherwise raises CredentialBackendError so that secrets are never
-        stored insecurely by accident.
+    Non-Windows without allow_in_memory:
+        Raises CredentialBackendError so that secrets are never stored
+        insecurely by accident.
 
     Environment variables are intentionally NOT used as a production store.
     """
+    if allow_in_memory:
+        return InMemoryCredentialStore()
+
     if sys.platform == "win32":
         try:
             from crypto.core.windows_cred import WindowsCredentialStore
@@ -196,9 +203,6 @@ def create_credential_store(*, allow_in_memory: bool = False) -> CredentialStore
                 "Windows Credential Manager is accessible. "
                 "Refusing to fall back to plaintext storage."
             ) from exc
-
-    if allow_in_memory:
-        return InMemoryCredentialStore()
 
     raise CredentialBackendError(
         "No secure credential backend available on this platform. "
