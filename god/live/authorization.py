@@ -170,3 +170,45 @@ class LiveAuthorizationGate:
     def note_gui_fault(self) -> None:
         """GUI crash must not arm or unlock LIVE."""
         return None
+
+    def resume_from_admin_policy(
+        self,
+        *,
+        autonomous_live: bool,
+        prerequisites_satisfied: bool,
+    ) -> LiveArmResult:
+        """Resume LIVE arm from administrative policy after restart."""
+        if self._state == LiveValidationState.DEMO and not autonomous_live:
+            return LiveArmResult(ok=True, state=self._state.value, reason="demo")
+        if self._safe_mode:
+            return LiveArmResult(
+                ok=False, state=LiveValidationState.SAFE_MODE.value, reason="safe_mode"
+            )
+        if not autonomous_live:
+            self._explicit_armed = False
+            self.recompute()
+            return LiveArmResult(
+                ok=False, state=self._state.value, reason="autonomous_live_false"
+            )
+        if not prerequisites_satisfied:
+            self._explicit_armed = False
+            self.recompute()
+            return LiveArmResult(
+                ok=False,
+                state=self._state.value,
+                reason="prerequisites_unmet",
+                missing=self._prereq.missing(),
+            )
+        self._prereq.operator_authorized = True
+        if not self._prereq.all_satisfied():
+            self._explicit_armed = False
+            self.recompute()
+            return LiveArmResult(
+                ok=False,
+                state=self._state.value,
+                reason="prerequisites_unmet",
+                missing=self._prereq.missing(),
+            )
+        self._explicit_armed = True
+        self._state = LiveValidationState.LIVE_ARMED
+        return LiveArmResult(ok=True, state=self._state.value, reason="resumed_from_admin_policy")
