@@ -1,7 +1,7 @@
 """Windows per-user startup integration for NVRAFX.
 
-Uses the standard HKCU Run key only. No scheduled task, service, shell script,
-or Defender/antivirus exclusions are created.
+Uses the standard HKCU Run key. Production command is headless autonomous:
+  NVRAFX.exe --autostart --headless
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 APP_NAME = "NVRAFX"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-AUTOSTART_ARGUMENT = "--autostart"
+AUTOSTART_ARGUMENT = "--autostart --headless"
 
 
 def _command() -> str:
