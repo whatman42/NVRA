@@ -184,7 +184,7 @@ python -m crypto --no-gui
 python -m crypto --smoke
 ```
 
-For a Windows packaged deployment, use `scripts/windows/register_autostart.ps1` with the absolute path to `NVRA.exe`. The task runs at user logon with Limited privileges and a maximum of five one-minute restart attempts.
+For a Windows packaged deployment, use `scripts/windows/register_autostart.ps1` with the absolute path to `NVRAFX.exe`. The task runs at user logon with Limited privileges and a maximum of five one-minute restart attempts.
 
 Troubleshooting:
 - `SAFE_MODE`: inspect runtime logs and resolve the failed prerequisite; startup will remain fail-closed.
