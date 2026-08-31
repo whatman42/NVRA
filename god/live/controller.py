@@ -5,7 +5,6 @@ LIVE requires: preflight PASS + explicit arm() + allow_live_account on adapter.
 ML / recovery / hardware MUST NEVER arm LIVE.
 AI MUST NEVER call order_send; only this controller may submit after gates.
 """
-
 from __future__ import annotations
 
 import time
@@ -16,9 +15,12 @@ from god.live.models import (
     HardRiskLimits,
     LiveExecutionState,
     LiveMode,
+    LivePrerequisites,
+    LiveValidationState,
     PreflightStatus,
 )
 from god.live.preflight import run_preflight
+from god.live.authorization import LiveAuthorizationGate
 from god.mt5_runtime.safety_gate import LiveCapitalGate, LIVE_CAPITAL_BLOCKED
 
 
@@ -83,6 +85,8 @@ class LiveExecutionController:
         self._open_positions: int = 0
         self._daily_loss: float = 0.0
         self._consecutive_losses: int = 0
+        # Product-facing validation gate (fail-closed). DEMO stays DEMO.
+        self.auth_gate = LiveAuthorizationGate(demo=(mode != LiveMode.LIVE))
 
     def _audit_event(self, kind: str, **payload: Any) -> None:
         self._audit.append({"ts": time.time(), "kind": kind, "state": self.state.value, **payload})
@@ -96,6 +100,8 @@ class LiveExecutionController:
             "live_capital_blocked": bool(self.capital_gate.blocked or LIVE_CAPITAL_BLOCKED),
             "halt_reason": self._halt_reason,
             "limits": self.limits.to_dict(),
+            "validation_state": self.auth_gate.state.value,
+            "can_submit_live": self.auth_gate.can_submit_live(),
         }
 
     def evaluate_preflight(self, checks: Optional[dict[str, PreflightStatus]] = None) -> dict[str, Any]:
@@ -133,17 +139,46 @@ class LiveExecutionController:
             self._audit_event("arm_denied", reason="missing_operator_ack")
             return {"ok": False, "reason": "missing_operator_ack", "state": self.state.value}
 
+        # LIVE path: authorization gate must allow ARM (prereqs + explicit ack).
+        # Capital gate remains independently fail-closed (LIVE_CAPITAL_BLOCKED).
+        if self.mode == LiveMode.LIVE:
+            arm_res = self.auth_gate.arm(operator_authorization=operator_ack)
+            if not arm_res.ok:
+                self.state = LiveExecutionState.BLOCKED
+                self._audit_event(
+                    "arm_denied",
+                    reason=arm_res.reason,
+                    missing=list(arm_res.missing),
+                )
+                return {
+                    "ok": False,
+                    "reason": arm_res.reason,
+                    "missing": list(arm_res.missing),
+                    "validation_state": arm_res.state,
+                    "state": self.state.value,
+                }
+
         self.state = LiveExecutionState.ARMED
         self._armed_at = time.time()
         self._audit_event("armed", operator_ack=operator_ack[:64])
-        return {"ok": True, "state": self.state.value, "armed_at": self._armed_at}
+        return {
+            "ok": True,
+            "state": self.state.value,
+            "armed_at": self._armed_at,
+            "validation_state": self.auth_gate.state.value,
+        }
 
     def disarm(self) -> dict[str, Any]:
         if self.state == LiveExecutionState.HALTED:
             return {"ok": False, "reason": "halted", "state": self.state.value}
         self.state = LiveExecutionState.DISABLED
+        self.auth_gate.disarm()
         self._audit_event("disarmed")
-        return {"ok": True, "state": self.state.value}
+        return {
+            "ok": True,
+            "state": self.state.value,
+            "validation_state": self.auth_gate.state.value,
+        }
 
     def kill_switch(self, reason: str = "operator_kill") -> dict[str, Any]:
         self.state = LiveExecutionState.HALTED
@@ -190,10 +225,16 @@ class LiveExecutionController:
             return LiveSubmitResult(
                 ok=False, status="HALTED", reason=self._halt_reason or "halted", state=self.state.value
             )
-        # ARMED = ready for first order; MONITORING = post-fill, still accepts new orders
         if self.state not in (LiveExecutionState.ARMED, LiveExecutionState.MONITORING):
             return LiveSubmitResult(
                 ok=False, status="BLOCKED", reason=f"state_{self.state.value}", state=self.state.value
+            )
+        if self.mode == LiveMode.LIVE and not self.auth_gate.can_submit_live():
+            return LiveSubmitResult(
+                ok=False,
+                status="BLOCKED",
+                reason="live_not_authorized",
+                state=self.state.value,
             )
 
         if intent.client_order_id in self._client_order_ids:
