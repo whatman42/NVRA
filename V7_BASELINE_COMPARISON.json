@@ -1,0 +1,23 @@
+{
+  "baseline_files": 722,
+  "final_files": 729,
+  "removed": [],
+  "added": [
+    "V7_BASELINE_COMPARISON.json",
+    "V7_DEEP_AUDIT_REPORT.md",
+    "docs/MIGRATION.md",
+    "god/persist/migration.py",
+    "src/crypto/execution/_order_utils.py",
+    "tests/migration/test_migration_bundle.py",
+    "tools/migrate_state.py"
+  ],
+  "changed": [
+    "AUDIT_DEEP_RELEASE.json",
+    "README.md",
+    "god/ml/split.py",
+    "god/persist/__init__.py",
+    "src/crypto/execution/adversarial.py",
+    "src/crypto/execution/paper.py",
+    "tools/deep_audit.py"
+  ]
+}

@@ -1,0 +1,110 @@
+name: Windows Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "god/**"
+      - "scripts/**"
+      - "packaging/**"
+      - "tests/**"
+      - "requirements.txt"
+      - "requirements-ml-full.txt"
+      - "config/**"
+      - "docs/**"
+      - "README.md"
+      - ".github/workflows/windows-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+
+      - name: Set Python module paths
+        shell: pwsh
+        run: |
+          "PYTHONPATH=$env:GITHUB_WORKSPACE;$env:GITHUB_WORKSPACE\src" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: GUI import smoke
+        shell: pwsh
+        run: python -c "from god.gui.main import NVRAFXWindow; print('GUI_IMPORT_OK')"
+
+      - name: Secret scan
+        shell: pwsh
+        run: python tools/secret_scan.py
+
+      - name: Regression (Windows)
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "."
+          python -m pytest tests/ -q --tb=line
+
+      - name: Build NVRAFX.exe (single product binary)
+        shell: pwsh
+        run: |
+          python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean
+          if (-not (Test-Path dist/NVRAFX.exe)) { throw "NVRAFX.exe missing" }
+          if (Test-Path dist/NUNG.exe) { throw "NUNG.exe must not be produced" }
+          if (Test-Path dist/NVRA.exe) { throw "NVRA.exe must not be produced" }
+          $len = (Get-Item dist/NVRAFX.exe).Length
+          if ($len -lt 1000000) { throw "NVRAFX.exe unexpectedly small: $len" }
+          Write-Host "NVRAFX.exe size=$len"
+
+      - name: Smoke CLI
+        shell: pwsh
+        run: |
+          & .\dist\NVRAFX.exe --version
+          if ($LASTEXITCODE -ne 0) { throw "version failed" }
+          & .\dist\NVRAFX.exe --health
+          if ($LASTEXITCODE -ne 0) { throw "health failed" }
+          & .\dist\NVRAFX.exe --check-config
+          if ($LASTEXITCODE -ne 0) { throw "check-config failed" }
+
+      - name: SHA256 and manifest
+        shell: pwsh
+        run: |
+          $h = Get-FileHash dist/NVRAFX.exe -Algorithm SHA256
+          @"
+          NVRAFX.exe  $($h.Hash)
+          "@ | Set-Content -Encoding utf8 SHA256SUMS.txt
+          @"
+          # NVRAFX_WINDOWS_RELEASE_MANIFEST.md
+          Product: NVRAFX
+          Architecture: N.U.N.G. / GOD (internal modules)
+          Binary: NVRAFX.exe (single product — no NUNG.exe, no NVRA.exe)
+          Modes: PAPER / DEMO / TRIAL | CLIENT | ADMIN (in-app)
+          Build: GitHub Actions windows-latest
+          LIVE-AUTHORIZED: false
+          live_authorized: false
+          broker_orders_submitted: 0
+          Self-contained: PyInstaller onefile
+          NVRAFX.exe SHA256: $($h.Hash)
+          Size: $((Get-Item dist/NVRAFX.exe).Length)
+          "@ | Set-Content -Encoding utf8 NVRAFX_WINDOWS_RELEASE_MANIFEST.md
+          Compress-Archive -Path dist/NVRAFX.exe,SHA256SUMS.txt,NVRAFX_WINDOWS_RELEASE_MANIFEST.md -DestinationPath NVRAFX_WINDOWS_RELEASE.zip -Force
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nvrafx-windows-release
+          path: |
+            dist/NVRAFX.exe
+            NVRAFX_WINDOWS_RELEASE.zip
+            SHA256SUMS.txt
+            NVRAFX_WINDOWS_RELEASE_MANIFEST.md

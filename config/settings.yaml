@@ -1,0 +1,144 @@
+# NVRA Unified Institutional Runtime Configuration
+# Secrets are NEVER stored here. Use environment variables / Windows Credential Manager.
+# PAPER-ONLY: this file intentionally contains no live execution switch.
+schema_version: nvra-config-v1
+
+# Hardware-aware workload governor. 8GB DDR3 is the minimum supported host.
+hardware:
+  auto_profile: true
+  minimum_ram_gb: 8
+  low_end_profile: LOW_END_8GB
+  recommended_profile: RECOMMENDED_16GB
+  performance_profile: PERFORMANCE_32GB
+  gpu_profile: GPU_64GB
+  inference_priority: true
+  max_cpu_percent_before_throttle: 80
+  max_memory_percent_before_throttle: 80
+  allow_heavy_ml_training_only_on_high_profile: true
+  agent_debate_rounds_max: 3
+
+runtime:
+  mode: PAPER
+  timezone: Asia/Jakarta
+  data_dir: "~/.nvrafx"
+  state_dir: "~/.nvrafx/state"
+  logs_dir: "~/.nvrafx/logs"
+
+portfolio:
+  initial_capital_idr: 10000000
+  reset_capital_idr: 10000000
+  max_positions: 20
+  max_asset_weight: 0.10
+  max_sector_weight: 0.20
+  max_drawdown: 0.15
+  daily_loss_limit: 0.03
+  correlation_penalty_threshold: 0.65
+  correlation_reject_threshold: 0.70
+
+signals:
+  adaptive_enabled: true
+  buy_threshold: 0.60
+  sell_threshold: 0.40
+  relaxation_step: 0.02
+  max_relaxation: 0.08
+  empty_cycles_before_relax: 2
+  recovery_cycles: 2
+
+execution:
+  paper_only: true
+  max_adv_participation: 0.01
+  base_fee_bps: 10
+  volatility_spread_multiplier: 1.0
+  market_impact_coefficient: 0.50
+  allow_partial_fill: true
+
+risk:
+  risk_ceiling_immutable: true
+  safe_mode_on_data_failure: true
+  safe_mode_on_storage_failure: true
+  safe_mode_on_resource_failure: true
+
+ml:
+  governor_enabled: true
+  max_active_models: 10
+  champion_challenger_enabled: true
+  retraining_mode: offline_governance
+  cpcv_enabled: true
+  pbo_enabled: true
+  deflated_sharpe_enabled: true
+  triple_barrier_enabled: true
+  drift_detection_enabled: true
+
+data:
+  provider_failures_before_fallback: 3
+  stale_data_days: 7
+  require_quality_gate: true
+  dynamic_universe: true
+
+telegram:
+  enabled: false
+  bot_token_env: TELEGRAM_BOT_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+  report_portfolio: true
+  report_signals: true
+  report_risk: true
+  report_health: true
+
+# Broker execution profiles. Each broker independently supports DEMO or REAL.
+# REAL additionally requires explicit environment authorization.
+brokers:
+  binance: {mode: DEMO, sandbox: true, allow_real: false}
+  tokocrypto: {mode: DEMO, sandbox: true, allow_real: false}
+  indodax: {mode: DEMO, sandbox: true, allow_real: false}
+  mt5: {mode: DEMO, sandbox: true, allow_real: false}
+
+real_trading:
+  enable_env: NVRA_REAL_TRADING_ENABLE
+  confirmation_env: NVRA_REAL_TRADING_CONFIRM
+  confirmation_phrase: I_UNDERSTAND_REAL_TRADING
+
+
+idx:
+  enabled: true
+  lot_size: 100
+  tick_rules_version: "configurable-2026"
+  enforce_sessions: true
+  enforce_ara_arb: true
+
+accounting:
+  commission_buy_bps: 0.0
+  commission_sell_bps: 0.0
+  exchange_fee_bps: 0.0
+  sell_tax_bps: 0.0
+  rates_source: "external_config_required"
+  effective_date: ""
+
+anti_overtrading:
+  enabled: true
+  cooldown_minutes: 30
+  minimum_holding_minutes: 0
+  max_daily_turnover: 1.0
+
+recovery:
+  order_journal: "state/order_journal.jsonl"
+  reconcile_before_new_orders: true
+  unknown_order_blocks_trading: true
+  auto_start_after_boot: true
+
+notifications:
+  structured_logging: true
+  minimum_severity: INFO
+
+validation:
+  offline_only_heavy_quant: true
+  demo_certification_days: 14
+  soak_cycles: 500
+
+cloud:
+  google_account_email: ""
+  google_drive_enabled: false
+  oauth_client_file: ""
+security:
+  totp_enabled: false
+  device_binding_enabled: true
+  license_service_url: ""

@@ -1,0 +1,2 @@
+# Backward-compatible alias: requirements.txt now contains the complete ML stack.
+-r requirements.txt

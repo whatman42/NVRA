@@ -1,0 +1,46 @@
+"""Extensible RCA taxonomy — descriptive categories, not trading rules."""
+
+from __future__ import annotations
+
+from enum import Enum
+
+
+class CauseCategory(str, Enum):
+    DATA_QUALITY = "DATA_QUALITY"
+    DATA_LATENCY = "DATA_LATENCY"
+    DATA_MISSING = "DATA_MISSING"
+    MODEL_BEHAVIOR = "MODEL_BEHAVIOR"
+    MODEL_DRIFT = "MODEL_DRIFT"
+    REGIME_CHANGE = "REGIME_CHANGE"
+    EXECUTION_BEHAVIOR = "EXECUTION_BEHAVIOR"
+    SLIPPAGE = "SLIPPAGE"
+    SPREAD = "SPREAD"
+    LIQUIDITY = "LIQUIDITY"
+    TIMING = "TIMING"
+    INFRASTRUCTURE = "INFRASTRUCTURE"
+    IPC = "IPC"
+    BRIDGE = "BRIDGE"
+    TERMINAL = "TERMINAL"
+    ASSUMPTION = "ASSUMPTION"
+    VALIDATION = "VALIDATION"
+    OVERFITTING = "OVERFITTING"
+    UNKNOWN = "UNKNOWN"
+
+
+class CausalStatus(str, Enum):
+    """Correlation ≠ causation. Explicit epistemic status."""
+
+    OBSERVED = "OBSERVED"
+    INFERRED = "INFERRED"
+    HYPOTHESIZED = "HYPOTHESIZED"
+    CONFIRMED = "CONFIRMED"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    UNKNOWN = "UNKNOWN"
+
+
+class CauseRole(str, Enum):
+    OBSERVED_FACT = "OBSERVED_FACT"
+    CONTRIBUTING_FACTOR = "CONTRIBUTING_FACTOR"
+    CANDIDATE_ROOT_CAUSE = "CANDIDATE_ROOT_CAUSE"
+    CONFIRMED_ROOT_CAUSE = "CONFIRMED_ROOT_CAUSE"
+    UNKNOWN = "UNKNOWN"
