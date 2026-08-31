@@ -1,19 +1,31 @@
 # Windows Auto-start
 
-Run PowerShell as the intended non-administrator user.
+Production command (headless autonomous core):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\register_autostart.ps1 `
-  -ExecutablePath "C:\Users\<user>\AppData\Local\NVRA\NVRAFX.exe"
+  -ExecutablePath "C:\NVRA\NVRAFX.exe"
 ```
 
-The task is triggered at user logon, runs with **Limited** privileges, and requests up to five restarts at one-minute intervals.
+The task runs:
 
-Remove it with:
+```text
+NVRAFX.exe --autostart --headless
+```
+
+- Trigger: user logon
+- RunLevel: Limited
+- Restart: up to 5 times, 1 minute interval
+- **No secrets** in task arguments
+- **No GUI** required for trading core
+
+HKCU Run (GUI checkbox) uses the same `--autostart --headless` arguments.
+
+Remove:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\unregister_autostart.ps1 `
-  -ExecutablePath "C:\Users\<user>\AppData\Local\NVRA\NVRAFX.exe"
+  -ExecutablePath "C:\NVRA\NVRAFX.exe"
 ```
 
-`ExecutablePath` must be absolute and end in `.exe`. Do not place secrets in the script or Task Scheduler arguments.
+See also: `docs/AUTONOMOUS_TRADING.md`
