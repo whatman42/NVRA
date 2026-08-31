@@ -37,7 +37,20 @@ jobs:
       - name: Smoke test
         shell: pwsh
         run: |
-          & .\dist\NVRAFX.exe --version
-          if ($LASTEXITCODE -ne 0) { throw "version failed" }
-          & .\dist\NVRAFX.exe --health
-          if ($LASTEXITCODE -ne 0) { throw "health failed" }
+          function Invoke-NvrafxCli([string]$CliArg) {
+            $p = Start-Process `
+              -FilePath ".\dist\NVRAFX.exe" `
+              -ArgumentList $CliArg `
+              -Wait `
+              -PassThru `
+              -WindowStyle Hidden
+            Write-Host "NVRAFX $CliArg ExitCode=$($p.ExitCode)"
+            if ($null -eq $p.ExitCode) {
+              throw "NVRAFX $CliArg returned null ExitCode (process did not report status)"
+            }
+            if ($p.ExitCode -ne 0) {
+              throw "NVRAFX $CliArg failed with exit code $($p.ExitCode)"
+            }
+          }
+          Invoke-NvrafxCli "--version"
+          Invoke-NvrafxCli "--health"

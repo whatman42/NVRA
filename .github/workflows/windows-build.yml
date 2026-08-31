@@ -73,12 +73,26 @@ jobs:
       - name: Smoke CLI
         shell: pwsh
         run: |
-          & .\dist\NVRAFX.exe --version
-          if ($LASTEXITCODE -ne 0) { throw "version failed" }
-          & .\dist\NVRAFX.exe --health
-          if ($LASTEXITCODE -ne 0) { throw "health failed" }
-          & .\dist\NVRAFX.exe --check-config
-          if ($LASTEXITCODE -ne 0) { throw "check-config failed" }
+          # Windowed (console=False / runw) EXEs do not reliably surface exit codes
+          # via PowerShell $LASTEXITCODE. Measure the real process ExitCode.
+          function Invoke-NvrafxCli([string]$CliArg) {
+            $p = Start-Process `
+              -FilePath ".\dist\NVRAFX.exe" `
+              -ArgumentList $CliArg `
+              -Wait `
+              -PassThru `
+              -WindowStyle Hidden
+            Write-Host "NVRAFX $CliArg ExitCode=$($p.ExitCode)"
+            if ($null -eq $p.ExitCode) {
+              throw "NVRAFX $CliArg returned null ExitCode (process did not report status)"
+            }
+            if ($p.ExitCode -ne 0) {
+              throw "NVRAFX $CliArg failed with exit code $($p.ExitCode)"
+            }
+          }
+          Invoke-NvrafxCli "--version"
+          Invoke-NvrafxCli "--health"
+          Invoke-NvrafxCli "--check-config"
 
       - name: SHA256 and manifest
         shell: pwsh
