@@ -27,11 +27,6 @@ BUILD_ID = "nvrafx-onefile"
 
 
 def _cli_write(text: str, *, stream: str = "stdout") -> None:
-    """Write CLI text without crashing on windowed (console=False) PyInstaller builds.
-
-    On Windows GUI-subsystem executables, stdout/stderr may be detached or
-    invalid. Best-effort write; never raise for missing stream handles.
-    """
     target = sys.stdout if stream == "stdout" else sys.stderr
     try:
         if target is None:
@@ -42,7 +37,6 @@ def _cli_write(text: str, *, stream: str = "stdout") -> None:
         except (OSError, ValueError, AttributeError):
             pass
     except (OSError, ValueError, AttributeError):
-        # Detached / closed / invalid handle — ignore for CLI smoke paths.
         if stream == "stdout":
             try:
                 err = sys.stderr
@@ -81,6 +75,7 @@ def cmd_health() -> int:
         "gui_required": False,
         "live_trading_enabled": False,
         "live_authorized": False,
+        "autonomous_headless_supported": True,
         "broker_orders_submitted": 0,
         "executable": "NVRAFX.exe",
     }
@@ -119,7 +114,6 @@ def cmd_check_config() -> int:
 
 
 def _run_nung_app(argv: list[str]) -> int:
-    """Optional NUNG application subcommands (register/login/status/start/stop)."""
     from god.app import NungApplication
 
     parser = argparse.ArgumentParser(prog="NVRAFX")
@@ -192,6 +186,16 @@ def _run_gui(*, autostart_mode: bool = False) -> int:
         return 1
 
 
+def _run_headless_autostart() -> int:
+    """Autonomous core — no GUI, no login, no interactive ARM."""
+    try:
+        from god.live.autonomous_runtime import run_autonomous_runtime
+        return int(run_autonomous_runtime())
+    except Exception as exc:
+        _cli_write(f"Headless autostart failed: {exc}\n", stream="stderr")
+        return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="NVRAFX",
@@ -200,8 +204,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--version", action="store_true", help="Show product/runtime version")
     p.add_argument("--health", action="store_true", help="Report health (no secrets)")
     p.add_argument("--check-config", action="store_true", help="Validate configuration")
-    p.add_argument("--gui", action="store_true", help="Launch the desktop GUI")
-    p.add_argument("--autostart", action="store_true", help="Launch the GUI and start safe PAPER/TRIAL runtime")
+    p.add_argument("--gui", action="store_true", help="Launch the desktop GUI (optional observer)")
+    p.add_argument("--autostart", action="store_true", help="Start autonomous runtime after administrative setup")
+    p.add_argument("--headless", action="store_true", help="No GUI (required for production auto-start)")
     p.add_argument(
         "--help-full",
         action="store_true",
@@ -213,15 +218,18 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[list[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
 
-    # App subcommands (register/login/...) when first token is a known cmd
     if argv and argv[0] in ("register", "login", "status", "start", "stop"):
         return _run_nung_app(argv)
 
     parser = build_parser()
     args, _unknown = parser.parse_known_args(argv)
 
-    if args.autostart:
+    if args.autostart and args.headless:
+        return _run_headless_autostart()
+    if args.autostart and not args.headless:
         return _run_gui(autostart_mode=True)
+    if args.headless and not args.autostart:
+        return _run_headless_autostart()
     if args.gui:
         return _run_gui()
     if args.version:
