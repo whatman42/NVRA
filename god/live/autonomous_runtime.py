@@ -1,7 +1,7 @@
 """Headless autonomous trading lifecycle after administrative setup.
 
 Does not implement strategy, risk math, or broker protocols.
-Orchestrates: load policy → safety chain → READY/RUNNING or SAFE_MODE.
+Orchestrates: load policy -> safety chain -> READY/RUNNING or SAFE_MODE.
 GUI is never required. ML cannot set administrative authorization.
 """
 
@@ -12,19 +12,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from god.live.autonomous_policy import (
-    AutonomousTradingPolicy,
-    default_policy_path,
-    load_policy,
-)
+from god.live.autonomous_policy import default_policy_path, load_policy
 from god.live.authorization import LiveAuthorizationGate
 from god.live.controller import LiveExecutionController
 from god.live.models import (
     LiveMode,
     LivePrerequisites,
-    LiveValidationState,
     PreflightStatus,
     MANDATORY_PREFLIGHT,
+    LiveExecutionState,
 )
 from god.mt5_runtime.safety_gate import LiveCapitalGate
 
@@ -153,9 +149,23 @@ def run_autonomous_startup(
     ctrl.auth_gate.set_prerequisites(prereq)
     pf = {n: PreflightStatus.PASS for n in MANDATORY_PREFLIGHT}
     ctrl.evaluate_preflight(pf)
-    arm = ctrl.arm_from_admin_policy(
-        prerequisites_satisfied=True, policy_reason="autonomous_policy_resume",
-    )
+
+    if hasattr(ctrl, "arm_from_admin_policy"):
+        arm = ctrl.arm_from_admin_policy(
+            prerequisites_satisfied=True,
+            policy_reason="autonomous_policy_resume",
+        )
+    else:
+        arm_res = ctrl.auth_gate.resume_from_admin_policy(
+            autonomous_live=True,
+            prerequisites_satisfied=True,
+        )
+        if arm_res.ok:
+            ctrl.state = LiveExecutionState.ARMED
+            arm = {"ok": True, "reason": "resumed_from_admin_policy", "state": ctrl.state.value}
+        else:
+            arm = {"ok": False, "reason": arm_res.reason, "missing": list(arm_res.missing)}
+
     if not arm.get("ok"):
         return AutonomousRuntimeResult(
             ok=False, state="SAFE_MODE", mode="LIVE",
