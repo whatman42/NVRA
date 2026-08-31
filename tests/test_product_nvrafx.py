@@ -1,6 +1,7 @@
-"""Product packaging invariants: sole distributed binary is NVRAFX.exe.
+"""Product packaging invariants: sole distributed binary is NVRA.exe.
 
-NUNG.exe and NVRA.exe must not be product outputs.
+NVRAFX.exe and NUNG.exe must not be product outputs.
+Product: NVRA | Developer: NUNG (identity only — never default credential).
 Adaptive ML and LIVE safety remain enforced.
 """
 from __future__ import annotations
@@ -11,8 +12,6 @@ import json
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
-
-import pytest
 
 from god.ml.hardware import (
     HardwareProfile,
@@ -55,9 +54,13 @@ def _snap(total_ram_mb: int, **kw) -> HardwareSnapshot:
     return HardwareSnapshot(total_ram_mb=total_ram_mb, **defaults)
 
 
-def test_product_name_is_nvrafx():
-    assert nvrafx_entry.PRODUCT_NAME == "NVRAFX"
-    assert "NVRAFX" in nvrafx_entry._version_text()
+def test_product_name_is_nvra():
+    assert nvrafx_entry.PRODUCT_NAME == "NVRA"
+    assert nvrafx_entry.DEVELOPER_NAME == "NUNG"
+    text = nvrafx_entry._version_text()
+    assert "NVRA" in text
+    assert "Developed by NUNG" in text
+    assert "NVRA.exe" in text
 
 
 def test_cli_version_health_check_config():
@@ -74,10 +77,12 @@ def test_health_payload_safety():
     data = json.loads(buf.getvalue())
     assert data["live_authorized"] is False
     assert data["broker_orders_submitted"] == 0
-    assert data["product"] == "NVRAFX"
+    assert data["product"] == "NVRA"
+    assert data.get("developer") == "NUNG"
+    assert data["executable"] == "NVRA.exe"
 
 
-def test_packaging_specs_name_nvrafx_only():
+def test_packaging_specs_name_nvra_only():
     specs = [
         ROOT / "packaging" / "nvrafx_onefile.spec",
         ROOT / "packaging" / "nung_windows.spec",
@@ -85,22 +90,32 @@ def test_packaging_specs_name_nvrafx_only():
     ]
     for spec in specs:
         text = spec.read_text(encoding="utf-8")
-        assert "name='NVRAFX'" in text or 'name="NVRAFX"' in text
+        assert 'name="NVRA"' in text or "name='NVRA'" in text
         assert "name='NUNG'" not in text
         assert 'name="NUNG"' not in text
-        assert "name='NVRA'" not in text
-        assert 'name="NVRA"' not in text
+        assert "name='NVRAFX'" not in text
+        assert 'name="NVRAFX"' not in text
+        assert "console=False" in text or "console = False" in text
 
 
-def test_workflows_reference_nvrafx_only():
+def test_workflows_reference_nvra_exe():
     wb = (ROOT / ".github" / "workflows" / "windows-build.yml").read_text(encoding="utf-8")
-    nv = (ROOT / ".github" / "workflows" / "nvra_windows_release.yml").read_text(
-        encoding="utf-8"
-    )
-    assert "NVRAFX.exe" in wb
-    assert "NVRAFX.exe" in nv
-    assert "name: nung-windows-release" not in wb
-    assert "nvrafx" in nv.lower()
+    nv = (ROOT / ".github" / "workflows" / "nvra_windows_release.yml").read_text(encoding="utf-8")
+    assert "NVRA.exe" in wb
+    assert "NVRA.exe" in nv
+    assert "NVRA.exe missing" in wb
+
+
+def test_no_default_nung_credentials_in_entry():
+    text = (ROOT / "scripts" / "nvrafx_entry.py").read_text(encoding="utf-8")
+    lowered = text.lower()
+    assert 'password = "nung"' not in lowered
+    assert "DEFAULT_USERNAME" not in text
+
+
+def test_main_version_health():
+    assert nvrafx_entry.main(["--version"]) == 0
+    assert nvrafx_entry.main(["--health"]) == 0
 
 
 def test_adaptive_ml_8gb_not_rf_only():
@@ -128,8 +143,3 @@ def test_adaptive_ml_32gb_high_performance():
         vram_mb=8192,
     )
     assert select_profile(snap) == HardwareProfile.HIGH_PERFORMANCE
-
-
-def test_main_entry_returns_int():
-    assert nvrafx_entry.main(["--version"]) == 0
-    assert nvrafx_entry.main(["--health"]) == 0

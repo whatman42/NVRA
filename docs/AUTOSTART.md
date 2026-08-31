@@ -1,31 +1,21 @@
-# Windows Auto-start
+# Autostart — NVRA
 
-Production command (headless autonomous core):
+**Product:** NVRA · **Developer:** NUNG
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\windows\register_autostart.ps1 `
-  -ExecutablePath "C:\NVRA\NVRAFX.exe"
-```
-
-The task runs:
-
-```text
-NVRAFX.exe --autostart --headless
-```
-
-- Trigger: user logon
-- RunLevel: Limited
-- Restart: up to 5 times, 1 minute interval
-- **No secrets** in task arguments
-- **No GUI** required for trading core
-
-HKCU Run (GUI checkbox) uses the same `--autostart --headless` arguments.
-
-Remove:
+## Windows
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\windows\unregister_autostart.ps1 `
-  -ExecutablePath "C:\NVRA\NVRAFX.exe"
+.\scripts\windows\register_autostart.ps1 -ExecutablePath "C:\NVRA\NVRA.exe"
 ```
 
-See also: `docs/AUTONOMOUS_TRADING.md`
+Runs: `NVRA.exe --autostart --headless` at logon (no GUI).
+
+## Oracle / Linux
+
+```bash
+sudo systemctl enable nvra
+```
+
+ExecStart: `python .../nvrafx_entry.py --autostart --headless`
+
+After administrative setup, reboot resumes autonomous runtime without operator login/ARM if prechecks PASS; otherwise SAFE_MODE.
