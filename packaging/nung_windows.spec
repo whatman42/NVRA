@@ -1,32 +1,29 @@
-# DEPRECATED — product binary is NVRAFX.exe only.
-# This file redirects to the unified NVRAFX one-file build so legacy scripts
-# do not produce NUNG.exe.
-# Prefer: packaging/nvrafx_onefile.spec
+# LEGACY alias — final product executable is NVRA.exe (not NVRAFX.exe / NUNG.exe).
+# Prefer: packaging/nvra_onefile.spec
+from pathlib import Path
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
+ROOT = Path(SPECPATH).resolve().parent
+
+hiddenimports = (
+    collect_submodules("god")
+    + collect_submodules("crypto")
+    + collect_submodules("nvra_unified")
+)
+datas = collect_data_files("god") + collect_data_files("crypto") + collect_data_files("nvra_unified")
 
 block_cipher = None
 
 a = Analysis(
-    ['../scripts/nvrafx_entry.py'],
-    pathex=['..'],
+    [str(ROOT / "scripts" / "nvrafx_entry.py")],
+    pathex=[str(ROOT), str(ROOT / "src")],
     binaries=[],
-    datas=[],
-    hiddenimports=[
-        'god.app',
-        'god.auth',
-        'god.admin',
-        'god.comms',
-        'god.persist',
-        'god.mt5_runtime',
-        'god.keygen',
-        'god.loop',
-        'god.production',
-        'god.ml',
-        'cryptography',
-    ],
+    datas=datas + [(str(ROOT / "god" / "gui" / "assets"), "god/gui/assets")],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['PyQt5', 'tkinter'],
+    excludes=["PyQt5", "tkinter"],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -40,15 +37,16 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='NVRAFX',
+    name="NVRA",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=str(ROOT / "god" / "gui" / "assets" / "nvra.ico"),
 )

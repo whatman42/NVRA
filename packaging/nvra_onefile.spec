@@ -1,24 +1,34 @@
-# DEPRECATED — product binary is NVRAFX.exe only.
-# Redirected to unified NVRAFX entry so legacy scripts do not produce NVRA.exe.
-# Prefer: packaging/nvrafx_onefile.spec
+# NVRA — canonical single-product Windows x64 one-file build.
+# Product: NVRA | Developer/Publisher: NUNG
+# Executable embeds Python runtime and installed Python dependencies.
+# Runtime state/config/secrets/data remain external by design.
+# console=False → windowed subsystem (runw.exe); CLI smoke uses Start-Process.
+from pathlib import Path
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
+ROOT = Path(SPECPATH).resolve().parent
+
+hiddenimports = (
+    collect_submodules("god")
+    + collect_submodules("crypto")
+    + collect_submodules("nvra_unified")
+)
+datas = collect_data_files("god") + collect_data_files("crypto") + collect_data_files("nvra_unified")
 
 block_cipher = None
 
 a = Analysis(
-    ['../scripts/nvrafx_entry.py'],
-    pathex=['..'],
+    [str(ROOT / "scripts" / "nvrafx_entry.py")],
+    pathex=[str(ROOT), str(ROOT / "src")],
     binaries=[],
-    datas=[],
-    hiddenimports=[
-        'god.nvra_app',
-        'god.production',
-        'god.runtime',
-        'god.loop',
-        'god.paper',
-        'god.ml',
-        'god.ml.adaptive',
-    ],
-    excludes=['PyQt5', 'matplotlib'],
+    datas=datas + [(str(ROOT / "god" / "gui" / "assets"), "god/gui/assets")],
+    hiddenimports=hiddenimports,
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=["PyQt5", "tkinter"],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
     cipher=block_cipher,
     noarchive=False,
 )
@@ -30,10 +40,16 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='NVRAFX',
+    name="NVRA",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon=str(ROOT / "god" / "gui" / "assets" / "nvra.ico"),
 )

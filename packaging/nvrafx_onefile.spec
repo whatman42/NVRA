@@ -1,6 +1,5 @@
-# NVRAFX — canonical single-product Windows x64 one-file build.
-# The executable embeds the Python runtime and installed Python dependencies.
-# Runtime state/config/secrets/data remain external by design.
+# LEGACY alias — final product executable is NVRA.exe (not NVRAFX.exe / NUNG.exe).
+# Prefer: packaging/nvra_onefile.spec
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
@@ -38,7 +37,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name="NVRAFX",
+    name="NVRA",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
