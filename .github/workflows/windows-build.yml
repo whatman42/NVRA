@@ -36,6 +36,10 @@ jobs:
           python -m pip install --upgrade pip
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
+      - name: pip check
+        shell: pwsh
+        run: python -m pip check
+
       - name: Set Python module paths
         shell: pwsh
         run: |

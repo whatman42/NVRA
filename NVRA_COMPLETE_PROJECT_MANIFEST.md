@@ -1,6 +1,6 @@
 # NVRA COMPLETE PROJECT MANIFEST
 
-Product: NVRA
+Product: NVRAFX
 Creator: N.U.N.G.
 
 ## Phase status
@@ -10,5 +10,6 @@ Creator: N.U.N.G.
 - LIVE: control layer present; READY = BLOCKED without real broker
 
 ## GitHub Actions
-- nvra_windows_release.yml → NVRA.exe
-- regression.yml, security.yml, windows-build.yml, release.yml
+- windows-build.yml → NVRAFX.exe (canonical Windows build)
+- nvra_windows_release.yml → NVRAFX.exe
+- regression.yml, security.yml, release.yml, build.yml, ci.yml
