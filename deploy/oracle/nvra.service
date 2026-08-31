@@ -1,0 +1,36 @@
+[Unit]
+Description=NVRA autonomous trading runtime (Developed by NUNG)
+Documentation=https://github.com/whatman42/nvra
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=nvra
+Group=nvra
+WorkingDirectory=/opt/nvra
+Environment=PYTHONPATH=/opt/nvra:/opt/nvra/src
+EnvironmentFile=-/etc/nvra/nvra.env
+ExecStart=/opt/nvra/venv/bin/python /opt/nvra/scripts/nvrafx_entry.py --autostart --headless
+Restart=on-failure
+RestartSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/nvra /var/log/nvra
+CapabilityBoundingSet=
+AmbientCapabilities=
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nvra
+
+[Install]
+WantedBy=multi-user.target
