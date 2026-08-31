@@ -193,8 +193,11 @@ def _run_gui(*, autostart_mode: bool = False) -> int:
 def _run_headless_autostart() -> int:
     """Autonomous core — no GUI, no login, no interactive ARM."""
     try:
+        from pathlib import Path as _P
         from god.live.autonomous_runtime import run_autonomous_runtime
-        return int(run_autonomous_runtime())
+        data = os.environ.get("NVRA_DATA_DIR", "").strip()
+        data_dir = _P(data) if data else None
+        return int(run_autonomous_runtime(data_dir=data_dir))
     except Exception as exc:
         _cli_write(f"Headless autostart failed: {exc}\n", stream="stderr")
         return 1
