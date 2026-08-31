@@ -1,12 +1,11 @@
 # Oracle Free Tier — NVRA Headless
 
-**Product:** NVRA · **Developer:** NUNG
+**Product:** NVRA · **Developer:** NUNG  
 
 ```bash
 sudo bash deploy/oracle/install.sh
 sudo systemctl enable --now nvra
-journalctl -u nvra -f
 ```
 
-Service user `nvra`, data `/var/lib/nvra` (0700), env `/etc/nvra/nvra.env` (0600).  
-No secrets in repository. LIVE fail-closed until policy + prechecks PASS.
+Data: `/var/lib/nvra` (0700). Env: `/etc/nvra/nvra.env` (0600).  
+LIVE fail-closed. MT5 not available on Linux.
