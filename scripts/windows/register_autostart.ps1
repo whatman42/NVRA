@@ -23,7 +23,7 @@ if ($ExecutablePath -match '[\x00-\x1F\r\n"`;&|<>]') {
 }
 
 $taskName = "NVRA-AutoStart"
-$action = New-ScheduledTaskAction -Execute $resolved
+$action = New-ScheduledTaskAction -Execute $resolved -Argument "--autostart --headless"
 $trigger = New-ScheduledTaskTrigger -AtLogOn
 $settings = New-ScheduledTaskSettingsSet `
     -RestartCount 5 `
@@ -39,6 +39,6 @@ Register-ScheduledTask `
     -Settings $settings `
     -RunLevel Limited `
     -Force `
-    -Description "NVRA user-logon auto-start (non-administrator)."
+    -Description "NVRA headless autonomous auto-start (non-administrator)."
 
 Write-Host "Registered $taskName for: $resolved"
