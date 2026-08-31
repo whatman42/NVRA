@@ -1,4 +1,4 @@
-"""LIVE execution controller — arming, risk gate, kill switch, order path.
+"""LIVE execution controller - arming, risk gate, kill switch, order path.
 
 Default state: DISABLED.
 LIVE requires: preflight PASS + explicit arm() + allow_live_account on adapter.
@@ -28,7 +28,7 @@ from god.mt5_runtime.safety_gate import LiveCapitalGate, LIVE_CAPITAL_BLOCKED
 class LiveOrderIntent:
     client_order_id: str
     symbol: str
-    side: str  # BUY | SELL
+    side: str
     size: float
     decision_id: str = ""
     risk_id: str = ""
@@ -38,7 +38,7 @@ class LiveOrderIntent:
 @dataclass
 class LiveSubmitResult:
     ok: bool
-    status: str  # REJECTED | ACCEPTED | FILLED | BLOCKED | HALTED
+    status: str
     reason: str = ""
     broker_response: Optional[dict[str, Any]] = None
     state: str = LiveExecutionState.DISABLED.value
@@ -54,16 +54,7 @@ class LiveSubmitResult:
 
 
 class LiveExecutionController:
-    """Authoritative LIVE gate + execution boundary.
-
-    Fail-closed invariants:
-    - starts DISABLED
-    - arm() requires preflight overall PASS
-    - LIVE_CAPITAL_BLOCKED / LiveCapitalGate blocks live capital path
-    - kill_switch() → HALTED (irreversible until explicit reset_after_halt)
-    - duplicate client_order_id blocked
-    - broker_orders_submitted only increments on confirmed broker accept
-    """
+    """Authoritative LIVE gate + execution boundary."""
 
     def __init__(
         self,
@@ -85,7 +76,6 @@ class LiveExecutionController:
         self._open_positions: int = 0
         self._daily_loss: float = 0.0
         self._consecutive_losses: int = 0
-        # Product-facing validation gate (fail-closed). DEMO stays DEMO.
         self.auth_gate = LiveAuthorizationGate(demo=(mode != LiveMode.LIVE))
 
     def _audit_event(self, kind: str, **payload: Any) -> None:
@@ -97,7 +87,7 @@ class LiveExecutionController:
             "mode": self.mode.value,
             "preflight": self._preflight_report.to_dict(),
             "broker_orders_submitted": self.broker_orders_submitted,
-            "live_capital_blocked": bool(self.capital_gate.blocked or LIVE_CAPITAL_BLOCKED),
+            "live_capital_blocked": not self.capital_gate.allow_live_execution(),
             "halt_reason": self._halt_reason,
             "limits": self.limits.to_dict(),
             "validation_state": self.auth_gate.state.value,
@@ -113,7 +103,6 @@ class LiveExecutionController:
         return self._preflight_report.to_dict()
 
     def arm(self, *, operator_ack: str = "") -> dict[str, Any]:
-        """Explicit arm. Requires preflight PASS. Never auto-called by ML/recovery."""
         if self.state == LiveExecutionState.HALTED:
             return {"ok": False, "reason": "halted", "state": self.state.value}
         if self._preflight_report.overall != PreflightStatus.PASS:
@@ -125,9 +114,7 @@ class LiveExecutionController:
                 "preflight": self._preflight_report.to_dict(),
                 "state": self.state.value,
             }
-        if self.mode == LiveMode.LIVE and (
-            self.capital_gate.blocked or LIVE_CAPITAL_BLOCKED
-        ):
+        if self.mode == LiveMode.LIVE and not self.capital_gate.allow_live_execution():
             self.state = LiveExecutionState.BLOCKED
             self._audit_event("arm_denied", reason="live_capital_blocked")
             return {
@@ -139,8 +126,6 @@ class LiveExecutionController:
             self._audit_event("arm_denied", reason="missing_operator_ack")
             return {"ok": False, "reason": "missing_operator_ack", "state": self.state.value}
 
-        # LIVE path: authorization gate must allow ARM (prereqs + explicit ack).
-        # Capital gate remains independently fail-closed (LIVE_CAPITAL_BLOCKED).
         if self.mode == LiveMode.LIVE:
             arm_res = self.auth_gate.arm(operator_authorization=operator_ack)
             if not arm_res.ok:
@@ -166,6 +151,47 @@ class LiveExecutionController:
             "state": self.state.value,
             "armed_at": self._armed_at,
             "validation_state": self.auth_gate.state.value,
+        }
+
+    def arm_from_admin_policy(
+        self,
+        *,
+        prerequisites_satisfied: bool,
+        policy_reason: str = "admin_policy",
+    ) -> dict[str, Any]:
+        """Resume LIVE after restart from administrative autonomous policy."""
+        if self.state == LiveExecutionState.HALTED:
+            return {"ok": False, "reason": "halted", "state": self.state.value}
+        if self._preflight_report.overall != PreflightStatus.PASS:
+            self.state = LiveExecutionState.BLOCKED
+            return {"ok": False, "reason": "preflight_not_pass", "state": self.state.value}
+        if self.mode != LiveMode.LIVE:
+            return {"ok": False, "reason": "not_live_mode", "state": self.state.value}
+        if not self.capital_gate.allow_live_execution():
+            self.state = LiveExecutionState.BLOCKED
+            return {"ok": False, "reason": "live_capital_blocked", "state": self.state.value}
+        arm_res = self.auth_gate.resume_from_admin_policy(
+            autonomous_live=True,
+            prerequisites_satisfied=prerequisites_satisfied,
+        )
+        if not arm_res.ok:
+            self.state = LiveExecutionState.BLOCKED
+            self._audit_event("arm_denied", reason=arm_res.reason, missing=list(arm_res.missing))
+            return {
+                "ok": False,
+                "reason": arm_res.reason,
+                "missing": list(arm_res.missing),
+                "state": self.state.value,
+            }
+        self.state = LiveExecutionState.ARMED
+        self._armed_at = time.time()
+        self._audit_event("armed_from_admin_policy", reason=policy_reason[:64])
+        return {
+            "ok": True,
+            "state": self.state.value,
+            "armed_at": self._armed_at,
+            "validation_state": self.auth_gate.state.value,
+            "reason": "resumed_from_admin_policy",
         }
 
     def disarm(self) -> dict[str, Any]:
@@ -220,7 +246,6 @@ class LiveExecutionController:
         *,
         broker_submit: Optional[Callable[[dict[str, Any]], dict[str, Any]]] = None,
     ) -> LiveSubmitResult:
-        """Only order path. Requires ARMED + risk + (LIVE mode ⇒ capital gate)."""
         if self.state == LiveExecutionState.HALTED:
             return LiveSubmitResult(
                 ok=False, status="HALTED", reason=self._halt_reason or "halted", state=self.state.value
@@ -254,18 +279,11 @@ class LiveExecutionController:
             )
 
         if self.mode == LiveMode.LIVE:
-            if self.capital_gate.blocked or LIVE_CAPITAL_BLOCKED:
-                return LiveSubmitResult(
-                    ok=False,
-                    status="BLOCKED",
-                    reason="live_capital_blocked",
-                    state=self.state.value,
-                )
             if not self.capital_gate.allow_live_execution():
                 return LiveSubmitResult(
                     ok=False,
                     status="BLOCKED",
-                    reason="live_unlock_denied",
+                    reason="live_capital_blocked",
                     state=self.state.value,
                 )
 
