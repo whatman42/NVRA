@@ -1,6 +1,9 @@
 """Optional compute providers — selection, fallback, security, validation (no cloud/GPU required)."""
 from __future__ import annotations
 
+import hashlib
+from pathlib import Path
+
 import pytest
 
 from god.ml.compute import (
@@ -17,6 +20,7 @@ from god.ml.compute import (
     select_provider,
     validate_training_result,
 )
+from god.ml.registry import ModelRegistry, ModelRecord
 
 
 def test_default_config_is_local_safe():
@@ -44,7 +48,6 @@ def test_select_local_mode():
 def test_colab_unavailable_falls_back_to_local():
     cfg = ComputeConfig(provider="colab")
     colab = ColabComputeProvider(enabled=True)
-    # Outside Colab runtime → UNAVAILABLE
     assert colab.probe().status == ProviderStatus.UNAVAILABLE
     p = select_provider(cfg, colab=colab)
     assert isinstance(p, LocalComputeProvider)
@@ -99,13 +102,13 @@ def test_kaggle_disconnect_is_interrupted_not_success():
     assert result.job.status == JobStatus.INTERRUPTED
 
 
-def test_local_submit_success_and_artifact():
-    local = LocalComputeProvider()
+def test_local_submit_success_and_artifact(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
     job = TrainingJob(model_id="baseline", dataset_hash="deadbeef", training_config_hash="cfg1")
     result = local.submit(job, {"rows": 100})
     assert result.job.status == JobStatus.SUCCESS
     assert result.artifact_hash
-    assert result.job.artifact_ref.startswith("local://")
+    assert Path(result.job.metadata["artifact_path"]).is_file()
 
 
 def test_sanitize_strips_credentials():
@@ -127,40 +130,178 @@ def test_sanitize_strips_credentials():
         assert_no_secrets(dirty)
 
 
-def test_job_manifest_rejects_secrets_on_submit():
-    local = LocalComputeProvider()
+def test_sanitize_nested_list_tuple_set():
+    dirty = {
+        "metadata": [{"api_token": "SECRET", "keep": 1}],
+        "items": ({"broker_password": "SECRET"}, {"safe": 1}),
+        "deep": [{"b": ({"mt5_login": "SECRET", "n": 2},)}],
+        "tags": {"ok", "token_value_should_stay_as_value"},
+    }
+    clean = sanitize_mapping(dirty)
+    assert "api_token" not in clean["metadata"][0]
+    assert clean["metadata"][0]["keep"] == 1
+    assert "broker_password" not in clean["items"][0]
+    assert clean["items"][1]["safe"] == 1
+    assert "mt5_login" not in clean["deep"][0]["b"][0]
+    assert clean["deep"][0]["b"][0]["n"] == 2
+    with pytest.raises(ValueError):
+        assert_no_secrets({"metadata": [{"API_TOKEN": "x"}]})
+
+
+def test_job_manifest_rejects_secrets_on_submit(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
     job = TrainingJob(model_id="m", metadata={"note": "ok"})
-    # sanitize happens inside submit; forbidden keys stripped, not raised when only in payload
     result = local.submit(job, {"api_token": "secret", "feature": 1})
     assert result.job.status == JobStatus.SUCCESS
-    # ensure secrets never stored on job metadata from payload
     assert "api_token" not in result.job.metadata
 
 
-def test_validate_success_eligible():
-    local = LocalComputeProvider()
+def test_dataset_provenance_matching_pass(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", model_version="1", dataset_hash="ABC"))
+    v = validate_training_result(result, expected_dataset_hash="ABC")
+    assert v.ok and v.eligible_for_promotion
+
+
+def test_dataset_provenance_wrong_hash_reject(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", dataset_hash="XYZ"))
+    v = validate_training_result(result, expected_dataset_hash="ABC")
+    assert not v.ok
+    assert "dataset_hash_mismatch" in v.reasons
+
+
+def test_dataset_provenance_missing_hash_reject(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", dataset_hash=""))
+    v = validate_training_result(result, expected_dataset_hash="ABC")
+    assert not v.ok
+    assert "missing_dataset_hash" in v.reasons
+
+
+def test_artifact_integrity_matching_pass(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
     result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
+    path = result.job.metadata["artifact_path"]
+    v = validate_training_result(result, expected_dataset_hash="h1", artifact_path=path)
+    assert v.ok
+
+
+def test_artifact_integrity_modified_file_reject(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
+    path = Path(result.job.metadata["artifact_path"])
+    path.write_bytes(path.read_bytes() + b"tamper")
+    v = validate_training_result(result, expected_dataset_hash="h1", artifact_path=path)
+    assert not v.ok
+    assert "artifact_hash_mismatch" in v.reasons
+
+
+def test_artifact_integrity_wrong_hash_reject(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
+    result.artifact_hash = "0" * 64
+    v = validate_training_result(
+        result,
+        expected_dataset_hash="h1",
+        artifact_path=result.job.metadata["artifact_path"],
+    )
+    assert not v.ok
+    assert "artifact_hash_mismatch" in v.reasons
+
+
+def test_artifact_unresolvable_reject():
+    local = LocalComputeProvider()  # no artifact_dir → local:// ref only
+    result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
+    v = validate_training_result(result, expected_dataset_hash="h1")
+    assert not v.ok
+    assert "artifact_unresolvable" in v.reasons
+
+
+def test_artifact_bytes_integrity(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
+    raw = Path(result.job.metadata["artifact_path"]).read_bytes()
+    v = validate_training_result(
+        result, expected_dataset_hash="h1", artifact_bytes=raw, require_resolvable_artifact=False
+    )
+    assert v.ok
+    v2 = validate_training_result(
+        result, expected_dataset_hash="h1", artifact_bytes=b"nope", require_resolvable_artifact=False
+    )
+    assert not v2.ok
+
+
+def test_failure_states_reject_promotion():
+    for status, notes in [
+        (JobStatus.INTERRUPTED, ("interrupted", "not_success")),
+        (JobStatus.UNKNOWN, ()),
+        (JobStatus.FAILED, ()),
+    ]:
+        colab = ColabComputeProvider(enabled=True)
+        colab._force_status = ProviderStatus.AVAILABLE
+        if status == JobStatus.INTERRUPTED:
+            colab._force_disconnect = True
+            result = colab.submit(TrainingJob(model_id="m", dataset_hash="h"))
+        else:
+            result = colab.submit(TrainingJob(model_id="m", dataset_hash="h"))
+            result.job.status = status
+        v = validate_training_result(result, expected_dataset_hash="h", require_resolvable_artifact=False)
+        assert not v.eligible_for_promotion
+
+
+def test_validate_success_eligible(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    result = local.submit(TrainingJob(model_id="m", model_version="1", dataset_hash="h1"))
     v = validate_training_result(result, expected_dataset_hash="h1")
     assert v.ok and v.eligible_for_promotion
 
 
-def test_validate_interrupted_rejects_promotion():
+def test_registry_promotion_rejects_invalid_compute(tmp_path: Path):
+    reg = ModelRegistry(tmp_path / "reg")
+    reg._records.append(
+        ModelRecord(model_id="m", model_version="1", status="candidate", features_version="f1", dataset_hash="h1")
+    )
+    reg._save()
     colab = ColabComputeProvider(enabled=True)
     colab._force_status = ProviderStatus.AVAILABLE
     colab._force_disconnect = True
-    result = colab.submit(TrainingJob(model_id="m"))
-    v = validate_training_result(result)
-    assert not v.ok
-    assert not v.eligible_for_promotion
-    assert any("not_success" in r or "interrupted" in r for r in v.reasons)
+    bad = colab.submit(TrainingJob(model_id="m", model_version="1", dataset_hash="h1"))
+    with pytest.raises(PermissionError, match="compute_validation_rejected"):
+        reg.promote_champion("m", "1", training_result=bad, expected_dataset_hash="h1")
 
 
-def test_validate_bad_hash_rejects():
-    local = LocalComputeProvider()
-    result = local.submit(TrainingJob(model_id="m", dataset_hash="h1"))
-    result.artifact_hash = "short"
-    v = validate_training_result(result)
-    assert not v.eligible_for_promotion
+def test_registry_promotion_requires_training_result_when_gated(tmp_path: Path):
+    reg = ModelRegistry(tmp_path / "reg")
+    reg._records.append(
+        ModelRecord(model_id="m", model_version="1", status="candidate", features_version="f1", dataset_hash="h1")
+    )
+    reg._save()
+    with pytest.raises(PermissionError, match="training_result_missing"):
+        reg.promote_champion("m", "1", require_compute_gate=True)
+
+
+def test_registry_promotion_accepts_valid_compute(tmp_path: Path):
+    reg = ModelRegistry(tmp_path / "reg")
+    reg._records.append(
+        ModelRecord(model_id="m", model_version="1", status="candidate", features_version="f1", dataset_hash="h1")
+    )
+    reg._save()
+    local = LocalComputeProvider(artifact_dir=tmp_path / "arts")
+    result = local.submit(TrainingJob(model_id="m", model_version="1", dataset_hash="h1"))
+    promoted = reg.promote_from_compute(result, expected_dataset_hash="h1")
+    assert promoted.status == "champion"
+
+
+def test_direct_promote_without_compute_still_works_for_non_compute(tmp_path: Path):
+    """Legacy path: non-compute models can promote without training_result."""
+    reg = ModelRegistry(tmp_path / "reg")
+    reg._records.append(
+        ModelRecord(model_id="legacy", model_version="1", status="candidate", features_version="f1", dataset_hash="legacy")
+    )
+    reg._save()
+    rec = reg.promote_champion("legacy", "1")
+    assert rec.status == "champion"
 
 
 def test_cloud_providers_do_not_support_inference_path():

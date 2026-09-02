@@ -86,6 +86,15 @@ prepare dataset + hash
 
 Invalid hash, schema mismatch, or non-SUCCESS job status ⇒ **no promotion**.
 
+Fail-closed integrity rules:
+
+- expected dataset hash provided but job hash missing/mismatched → REJECT
+- artifact must be resolvable (on-disk path or bytes) and SHA-256 must match `artifact_hash`
+- unresolvable artifact reference → REJECT (not PASS)
+- `ModelRegistry.promote_champion(..., training_result=...)` and `promote_from_compute` always enforce this gate
+
+Colab/Kaggle remain **external-session adapters** (protocol only) until a real remote worker is attached; disconnect never reports SUCCESS.
+
 ## Security
 
 Cloud payloads and job metadata are passed through `sanitize_mapping`. Forbidden key fragments include password, secret, token, api_key, broker, mt5, credential, live_auth, keyring, etc.
