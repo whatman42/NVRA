@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 from typing import Any, Mapping, Optional
 
 from god.ml.hardware import ResourceGovernor, detect_hardware
@@ -21,8 +22,14 @@ from .types import (
 class LocalComputeProvider(ComputeProvider):
     name = "local"
 
-    def __init__(self, *, governor: Optional[ResourceGovernor] = None) -> None:
+    def __init__(
+        self,
+        *,
+        governor: Optional[ResourceGovernor] = None,
+        artifact_dir: Optional[Path] = None,
+    ) -> None:
         self._governor = governor
+        self._artifact_dir = Path(artifact_dir) if artifact_dir else None
 
     def probe(self) -> ProviderCapability:
         snap = detect_hardware()
@@ -50,8 +57,6 @@ class LocalComputeProvider(ComputeProvider):
             job.metadata = {**job.metadata, "reason": "resource_pressure_blocks_training"}
             return TrainingResult(job=job, provider_notes=("training_deferred",))
 
-        # Local path: produce deterministic artifact metadata only (no cloud, no execution).
-        # Real model fitting remains in god.ml.train / pipeline; this provider orchestrates jobs.
         job.status = JobStatus.RUNNING
         job.provider = self.name
         body = {
@@ -64,11 +69,24 @@ class LocalComputeProvider(ComputeProvider):
         }
         raw = json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
         artifact_hash = hashlib.sha256(raw).hexdigest()
-        job.artifact_ref = f"local://{job.job_id}/{artifact_hash[:16]}"
+
+        artifact_path = ""
+        if self._artifact_dir is not None:
+            self._artifact_dir.mkdir(parents=True, exist_ok=True)
+            out = self._artifact_dir / f"{job.job_id}.artifact"
+            out.write_bytes(raw)
+            artifact_path = str(out)
+            job.artifact_ref = str(out)
+        else:
+            job.artifact_ref = f"local://{job.job_id}/{artifact_hash[:16]}"
+
         job.checkpoint_ref = f"local://{job.job_id}/ckpt"
         job.status = JobStatus.SUCCESS
         job.metrics = dict(job.metrics) or {"local_ok": 1.0}
-        job.metadata = {**job.metadata, "artifact_hash": artifact_hash}
+        meta = {**job.metadata, "artifact_hash": artifact_hash}
+        if artifact_path:
+            meta["artifact_path"] = artifact_path
+        job.metadata = meta
         return TrainingResult(
             job=job,
             artifact_hash=artifact_hash,
