@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -10,25 +9,7 @@ from god.auth.password import hash_password, verify_password
 
 from .models import AdminIdentity, AdminStatus, utc_now
 
-
-def _secure_write(path: Path, data: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        os.chmod(path.parent, 0o700)
-    except OSError:
-        pass
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(data)
-        fd = -1
-    finally:
-        if fd != -1:
-            os.close(fd)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
-    os.chmod(path, 0o600)
+from god.persist.secure_write import secure_write_json
 
 
 class AdminRegistry:
@@ -50,7 +31,7 @@ class AdminRegistry:
 
     def _save(self) -> None:
         payload = {"version": 1, "admins": self._admins}
-        _secure_write(self.path, json.dumps(payload, indent=2))
+        secure_write_json(self.path, payload)
 
     def register(self, username: str, password: str, display_name: str = "") -> dict:
         key = username.strip().lower()
@@ -73,9 +54,9 @@ class AdminRegistry:
             "password_hash": hash_password(password),
         }
         self._save()
-        return {"ok": True, "admin_id": identity.admin_id}
+        return {"ok": True, "admin_id": identity.admin_id, "username": identity.username}
 
-    def authenticate(self, username: str, password: str) -> Optional[AdminIdentity]:
+    def authenticate(self, username: str, password: str) -> Optional[dict]:
         key = username.strip().lower()
         rec = self._admins.get(key)
         if not rec:
@@ -83,6 +64,31 @@ class AdminRegistry:
         if not verify_password(password, rec.get("password_hash", "")):
             return None
         identity = AdminIdentity.from_dict(rec["identity"])
-        if identity.status != AdminStatus.ADMIN_ACTIVE:
+        if identity.status != AdminStatus.ACTIVE:
             return None
-        return identity
+        return {"ok": True, "admin_id": identity.admin_id, "username": identity.username, "identity": identity}
+
+    def get(self, username: str) -> Optional[AdminIdentity]:
+        key = username.strip().lower()
+        rec = self._admins.get(key)
+        if not rec:
+            return None
+        try:
+            return AdminIdentity.from_dict(rec["identity"])
+        except Exception:
+            return None
+
+    def list_usernames(self) -> list[str]:
+        return sorted(self._admins.keys())
+
+    def deactivate(self, username: str) -> bool:
+        key = username.strip().lower()
+        rec = self._admins.get(key)
+        if not rec:
+            return False
+        identity = AdminIdentity.from_dict(rec["identity"])
+        identity.status = AdminStatus.INACTIVE
+        identity.updated_at = utc_now()
+        rec["identity"] = identity.to_dict()
+        self._save()
+        return True

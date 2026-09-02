@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
@@ -10,25 +9,7 @@ from typing import Dict, Optional
 from .identity import UserIdentity, IdentityError
 from .password import hash_password, verify_password
 
-
-def _secure_write(path: Path, data: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        os.chmod(path.parent, 0o700)
-    except OSError:
-        pass
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(data)
-        fd = -1
-    finally:
-        if fd != -1:
-            os.close(fd)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
-    os.chmod(path, 0o600)
+from god.persist.secure_write import secure_write_json
 
 
 @dataclass
@@ -59,7 +40,7 @@ class UserRegistry:
 
     def _save(self) -> None:
         payload = {"version": 1, "users": self._users}
-        _secure_write(self.path, json.dumps(payload, indent=2))
+        secure_write_json(self.path, payload)
 
     def register(
         self,
@@ -98,10 +79,17 @@ class UserRegistry:
             return None
 
     def get(self, username: str) -> Optional[UserIdentity]:
-        rec = self._users.get(username.strip().lower())
+        key = username.strip().lower()
+        rec = self._users.get(key)
         if not rec:
             return None
         try:
             return UserIdentity.from_dict(rec["identity"])
         except IdentityError:
             return None
+
+    def list_usernames(self) -> list[str]:
+        return sorted(self._users.keys())
+
+    def exists(self, username: str) -> bool:
+        return username.strip().lower() in self._users

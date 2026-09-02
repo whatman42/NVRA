@@ -129,6 +129,12 @@ report={
 # Hard failures: syntax, missing deps, unsafe artifacts. Duplicates/orphans are audit findings and are
 # only hard failures when they represent exact non-trivial duplicates or workflow conflicts.
 if syntax or missing or cache or workflow_conflicts or duplicate_bodies or secrets:
-    issues.extend(['syntax' for _ in syntax]); issues.extend(['dependency' for _ in missing]); issues.extend(['cache']); issues.extend(['workflow' for _ in workflow_conflicts]); issues.extend(['duplicate' for _ in duplicate_bodies]); issues.extend(['secret' for _ in secrets])
+    issues.extend(['syntax' for _ in syntax])
+    issues.extend(['dependency' for _ in missing])
+    if cache:
+        issues.append('cache')
+    issues.extend(['workflow' for _ in workflow_conflicts])
+    issues.extend(['duplicate' for _ in duplicate_bodies])
+    issues.extend(['secret' for _ in secrets])
 print(json.dumps({'status':'PASS' if not issues else 'FAIL','issues':sorted(set(issues)), 'python_files':len(PY_FILES),'source_lines':line_count,'orphan_modules':len(orphan),'duplicate_groups':len(duplicate_bodies)},indent=2))
 sys.exit(1 if issues else 0)
