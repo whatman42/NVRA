@@ -134,7 +134,48 @@ class ModelRegistry:
         self._save()
         return rec
 
-    def promote_champion(self, model_id: str, model_version: str) -> ModelRecord:
+    def promote_champion(
+        self,
+        model_id: str,
+        model_version: str,
+        *,
+        training_result: object | None = None,
+        expected_dataset_hash: str = "",
+        artifact_path: str | None = None,
+        require_compute_gate: bool = False,
+    ) -> ModelRecord:
+        """Promote model to champion.
+
+        When *training_result* is provided or *require_compute_gate* is True,
+        compute artifact validation is mandatory (cannot be bypassed).
+        Existing ML governance (evaluate_promotion / OOS gates) remains a
+        separate caller responsibility; this is an additional integrity gate.
+        """
+        if training_result is not None or require_compute_gate:
+            if training_result is None:
+                raise PermissionError("compute_gate_required:training_result_missing")
+            from god.ml.compute.validation import validate_training_result
+
+            job = getattr(training_result, "job", None)
+            exp = expected_dataset_hash
+            if not exp and job is not None:
+                exp = str(getattr(job, "dataset_hash", "") or "")
+            # Fail-closed: compute-origin promotion always requires dataset provenance
+            if not exp:
+                raise PermissionError(
+                    "compute_validation_rejected:missing_expected_dataset_hash"
+                )
+            gate = validate_training_result(
+                training_result,  # type: ignore[arg-type]
+                expected_dataset_hash=exp,
+                artifact_path=artifact_path,
+                require_resolvable_artifact=True,
+            )
+            if not gate.eligible_for_promotion:
+                raise PermissionError(
+                    "compute_validation_rejected:" + ",".join(gate.reasons)
+                )
+
         found = None
         for r in self._records:
             if r.model_id == model_id and r.model_version == model_version:
@@ -146,6 +187,30 @@ class ModelRegistry:
         found.status = "champion"
         self._save()
         return found
+
+    def promote_from_compute(
+        self,
+        training_result: object,
+        *,
+        model_id: str = "",
+        model_version: str = "",
+        expected_dataset_hash: str = "",
+        artifact_path: str | None = None,
+    ) -> ModelRecord:
+        """Mandatory compute-gated promotion — validation cannot be bypassed."""
+        job = getattr(training_result, "job", None)
+        mid = model_id or (getattr(job, "model_id", "") if job else "")
+        mver = model_version or (getattr(job, "model_version", "1") if job else "1")
+        if not mid:
+            raise ValueError("model_id required for compute promotion")
+        return self.promote_champion(
+            mid,
+            mver,
+            training_result=training_result,
+            expected_dataset_hash=expected_dataset_hash,
+            artifact_path=artifact_path,
+            require_compute_gate=True,
+        )
 
     def champion(self) -> Optional[ModelRecord]:
         for r in self._records:
