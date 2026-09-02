@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from crypto.gui.first_run import FirstRunController
 from crypto.gui.state import GuiSnapshot, SnapshotBus
 from crypto.gui.wizard import WizardState
 
@@ -28,6 +29,7 @@ class GuiApp:
         self._window: Any = None
         self._timer: Any = None
         self.wizard = WizardState()
+        self.first_run = FirstRunController(self.wizard)
 
     def start(self) -> bool:
         if not pyside6_available():
