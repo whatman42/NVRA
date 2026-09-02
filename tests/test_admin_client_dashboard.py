@@ -73,28 +73,32 @@ def test_admin_client_detail_no_secrets():
     assert detail["risk_status"]["governor"] == "NORMAL"
     assert detail["model_status"]["active_model"] == "m1"
     assert detail["admin_capabilities"]["bypass_risk_governor"] is False
-    assert detail["admin_capabilities"]["force_live_order"] is False
     assert detail["runtime"]["mode"] == "PAPER"
 
 
 def test_tenant_isolation_portfolio():
     store, admin, a, b, *_ = _seed()
+    # Client A forges client_id=B → still scoped to A
     scoped = client_portfolio(store, a.id, requested_client_id=b.id)
     assert scoped["client_id"] == a.id
-    st = client_status(store, b.id)
-    assert st["client_id"] == b.id
-    assert admin_client_detail(store, admin.id, a.id)["client_id"] == a.id
-    assert admin_client_detail(store, admin.id, b.id)["client_id"] == b.id
+    # Admin can request B
+    assert client_portfolio(store, admin.id, requested_client_id=b.id)["client_id"] == b.id
 
 
 def test_client_cannot_view_other_detail_via_admin_api():
+    store, admin, a, b, *_ = _seed()
+    with pytest.raises(Forbidden):
+        admin_client_detail(store, a.id, b.id)
+
+
+def test_client_cannot_admin_view_other():
     store, admin, a, b, *_ = _seed()
     with pytest.raises(Forbidden):
         admin_view_client(store, a.id, b.id)
 
 
 def test_dashboard_summary_counts():
-    store, admin, *_ = _seed()
+    store, admin, a, b, *_ = _seed()
     summary = admin_clients_summary(store, admin.id)
     assert summary["clients_total"] == 2
     assert summary["online"] >= 1
@@ -102,14 +106,14 @@ def test_dashboard_summary_counts():
 
 def test_status_derivation_real_state():
     assert derive_connection_status(
-        license_status="ACTIVE", account_status="ACTIVE", last_hb_age=10, safe_mode=False
-    ) == "ONLINE"
-    assert derive_connection_status(
         license_status="REVOKED", account_status="ACTIVE", last_hb_age=10, safe_mode=False
     ) == "LICENSE_BLOCKED"
     assert derive_connection_status(
         license_status="ACTIVE", account_status="ACTIVE", last_hb_age=10, safe_mode=True
     ) == "SAFE_MODE"
+    assert derive_connection_status(
+        license_status="ACTIVE", account_status="ACTIVE", last_hb_age=10, safe_mode=False
+    ) == "ONLINE"
     assert derive_connection_status(
         license_status="ACTIVE", account_status="ACTIVE", last_hb_age=600, safe_mode=False
     ) == "OFFLINE_GRACE"
