@@ -137,6 +137,28 @@ class ControlPlaneStore:
         self.audit_log(account_id, "HEARTBEAT_RECEIVED", device_id, "ok")
         return hb
 
+    def disable_account(self, account_id: str, *, actor: str) -> Account:
+        acc = self.accounts[account_id]
+        acc.status = AccountStatus.DISABLED
+        acc.updated_at = time.time()
+        self.audit_log(actor, "CLIENT_DISABLED", account_id, "ok")
+        return acc
+
+    def enable_account(self, account_id: str, *, actor: str) -> Account:
+        acc = self.accounts[account_id]
+        if acc.status == AccountStatus.REVOKED:
+            raise PermissionError("cannot_enable_revoked")
+        acc.status = AccountStatus.ACTIVE
+        acc.updated_at = time.time()
+        self.audit_log(actor, "CLIENT_ENABLED", account_id, "ok")
+        return acc
+
+    def disable_license(self, license_id: str, *, actor: str) -> License:
+        lic = self.licenses[license_id]
+        lic.status = LicenseStatus.DISABLED
+        self.audit_log(actor, "LICENSE_DISABLED", license_id, "ok")
+        return lic
+
     def list_clients(self) -> list[Account]:
         return [a for a in self.accounts.values() if a.role == Role.CLIENT]
 
