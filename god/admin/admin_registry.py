@@ -54,9 +54,9 @@ class AdminRegistry:
             "password_hash": hash_password(password),
         }
         self._save()
-        return {"ok": True, "admin_id": identity.admin_id, "username": identity.username}
+        return {"ok": True, "admin_id": identity.admin_id}
 
-    def authenticate(self, username: str, password: str) -> Optional[dict]:
+    def authenticate(self, username: str, password: str) -> Optional[AdminIdentity]:
         key = username.strip().lower()
         rec = self._admins.get(key)
         if not rec:
@@ -64,31 +64,6 @@ class AdminRegistry:
         if not verify_password(password, rec.get("password_hash", "")):
             return None
         identity = AdminIdentity.from_dict(rec["identity"])
-        if identity.status != AdminStatus.ACTIVE:
+        if identity.status != AdminStatus.ADMIN_ACTIVE:
             return None
-        return {"ok": True, "admin_id": identity.admin_id, "username": identity.username, "identity": identity}
-
-    def get(self, username: str) -> Optional[AdminIdentity]:
-        key = username.strip().lower()
-        rec = self._admins.get(key)
-        if not rec:
-            return None
-        try:
-            return AdminIdentity.from_dict(rec["identity"])
-        except Exception:
-            return None
-
-    def list_usernames(self) -> list[str]:
-        return sorted(self._admins.keys())
-
-    def deactivate(self, username: str) -> bool:
-        key = username.strip().lower()
-        rec = self._admins.get(key)
-        if not rec:
-            return False
-        identity = AdminIdentity.from_dict(rec["identity"])
-        identity.status = AdminStatus.INACTIVE
-        identity.updated_at = utc_now()
-        rec["identity"] = identity.to_dict()
-        self._save()
-        return True
+        return identity

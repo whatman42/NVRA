@@ -79,17 +79,10 @@ class UserRegistry:
             return None
 
     def get(self, username: str) -> Optional[UserIdentity]:
-        key = username.strip().lower()
-        rec = self._users.get(key)
+        rec = self._users.get(username.strip().lower())
         if not rec:
             return None
         try:
             return UserIdentity.from_dict(rec["identity"])
         except IdentityError:
             return None
-
-    def list_usernames(self) -> list[str]:
-        return sorted(self._users.keys())
-
-    def exists(self, username: str) -> bool:
-        return username.strip().lower() in self._users
