@@ -1,0 +1,40 @@
+{
+  "experiment_id": "EXP-DR-03C.1",
+  "git_commit": "0be22f29f3455582b08dbe6d6c6c09555b18d38c",
+  "seed": 7,
+  "n_per_regime_block": 4000,
+  "design": "EXPLORATORY SYNTHETIC EVIDENCE",
+  "classification": "HOLD",
+  "production_changed": false,
+  "claim_market_validated": false,
+  "baseline_combined": {
+    "FNR": 0.27074422583404617,
+    "FPR": 0.018050541516245487,
+    "delta_good_bad": 0.7112052326497083,
+    "veto_rate": 0.56625
+  },
+  "baseline_FNR_bootstrap_CI": {
+    "mean": 0.2703591732817572,
+    "lo": 0.25281684222795836,
+    "hi": 0.2864408097183355
+  },
+  "n_candidates_meeting_GO_bar": 0,
+  "best_feasible_threshold": 0.5,
+  "gate_ablation_summary": {
+    "none": {"FNR": 0.0, "FPR": 0.952, "delta": 0.048},
+    "conf_only": {"FNR": 0.149, "FPR": 0.020, "delta": 0.830},
+    "ood_only": {"FNR": 0.139, "FPR": 0.806, "delta": 0.054},
+    "combined": {"FNR": 0.271, "FPR": 0.018, "delta": 0.711}
+  },
+  "calibration_summary": {
+    "uncalibrated_FNR": 0.271,
+    "oracle_FNR": 0.246,
+    "heavy_miscal_FNR": 0.787
+  },
+  "03D_recommendation": "PREMATURE — do not implement; proposal deferred",
+  "pre_registered": {
+    "PRACTICAL_FNR_DROP": 0.1,
+    "PRACTICAL_FPR_RISE": 0.05,
+    "BASE_MIN_CONF": 0.5
+  }
+}

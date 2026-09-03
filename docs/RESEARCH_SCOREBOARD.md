@@ -6,7 +6,8 @@
 | EXP-DR-02 Invariant probes | **PASS** | Exploratory | API-level INVs |
 | EXP-DR-03 Uncertainty→risk paths | **FAIL** | Confirmatory | connected_path_count=0 |
 | EXP-DR-03B Trace | **PASS** | Confirmatory | DISCONNECTED + GATE-ONLY |
-| **EXP-DR-03C Gate effectiveness** | **HOLD** | Exploratory synthetic | Informative but high FNR |
+| EXP-DR-03C Gate effectiveness | **HOLD** | Exploratory synthetic | Informative; high FNR on grid |
+| **EXP-DR-03C.1 False-veto/cal** | **HOLD** | Exploratory synthetic | Pareto FNR/FPR; 0 GO candidates |
 | EXP-DR-04 Dual-stack | INCONCLUSIVE | Exploratory | Non-isomorphic APIs |
 | EXP-DR-05 Chaos recovery | INCONCLUSIVE | Exploratory | No process injectors |
 | EXP-DR-06 Checkpoint corruption | **PASS** | Confirmatory | Fail-closed |
@@ -15,19 +16,18 @@
 | EXP-DR-14 Promotion mutation | **PASS** | Confirmatory | 100% reject |
 | EXP-DR-18 Kill/restart | INCONCLUSIVE | Exploratory | Static only |
 
-## EXP-DR-03C detail
+## EXP-DR-03C.1 detail
 
 | Field | Value |
 |-------|-------|
-| N | 2100 |
-| gate_veto_rate | 0.750 |
-| delta P(allow\|good)-P(allow\|bad) | 0.351 |
-| FNR / FPR | 0.538 / 0.111 |
-| Counterfactual ML gate causal | true |
-| Classification | **HOLD — CALIBRATION/THRESHOLD RESEARCH** |
-| Market validated | **false** |
-| Next | No Risk integration; optional EXP-DR-03D proposal only |
+| Baseline FNR (combined) | 0.271 (CI ~0.25–0.29) |
+| Baseline FPR | 0.018 |
+| GO-bar candidates | **0** |
+| conf_only Δ | 0.830 |
+| combined Δ | 0.711 |
+| Heavy miscal FNR | 0.787 |
+| 03D | **PREMATURE** |
 
-## Priority gap (unchanged)
+## Priority
 
-UncertaintyReport still not a RiskEngine input. Gates are upstream HARD VETO only; improve false-veto before any side-channel design.
+Do not wire UncertaintyReport into RiskEngine. Gate research remains upstream HOLD on tradeoff characterization.
