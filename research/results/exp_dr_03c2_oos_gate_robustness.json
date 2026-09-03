@@ -1,0 +1,43 @@
+{
+  "experiment_id": "EXP-DR-03C.2",
+  "git_sha": "4d9ae3d1fe67beb1bd614dcd870eb0d32530a7fb",
+  "classification": "HOLD",
+  "leakage_check": "PASS",
+  "reproducibility": "PASS",
+  "production_changed": false,
+  "claim_market_validated": false,
+  "03D": "PREMATURE",
+  "primary_policy": "P3_combined",
+  "selected_threshold": 0.5,
+  "primary_delta": {
+    "point": 0.4307927619808711,
+    "ci95_lo": 0.42037335575241924,
+    "ci95_hi": 0.44157583344564544
+  },
+  "primary_fnr": {
+    "point": 0.4589457678661936,
+    "ci95_lo": 0.449991552627133,
+    "ci95_hi": 0.46764656191924314
+  },
+  "primary_fpr": {
+    "point": 0.11026147015293537,
+    "ci95_lo": 0.10475250781121526,
+    "ci95_hi": 0.11609932576878802
+  },
+  "worst_regime": "R7_corr_shift",
+  "worst_regime_metrics": {
+    "delta": 0.22070316799859102,
+    "FNR": 0.5090702947845805,
+    "FPR": 0.2702265372168285
+  },
+  "ood_incremental_delta": -0.15978174522306682,
+  "go_flags": {
+    "A_delta": false,
+    "B_fnr": false,
+    "C_fpr": false,
+    "D_generalization": false,
+    "E_robustness": true,
+    "F_ood": false
+  },
+  "win_frac": 1.0
+}

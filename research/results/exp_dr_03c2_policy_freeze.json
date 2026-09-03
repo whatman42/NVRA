@@ -1,0 +1,23 @@
+{
+  "experiment_id": "EXP-DR-03C.2",
+  "git_sha": "4d9ae3d1fe67beb1bd614dcd870eb0d32530a7fb",
+  "master_seed": 11,
+  "selected_threshold": 0.5,
+  "selection_rule": "max delta on CAL among thr with FPR<=0.05 and FNR<=0.35; else 0.5",
+  "min_probability": 0.55,
+  "primary_policy": "P3_combined",
+  "train_n": 6000,
+  "cal_n": 3000,
+  "test_r0_n": 3000,
+  "go_criteria_pre_registered": {
+    "delta_min": 0.5,
+    "delta_ci_lo_min": 0.3,
+    "fnr_max": 0.2,
+    "fnr_regime_max": 0.3,
+    "fpr_max": 0.05,
+    "fpr_regime_max": 0.1,
+    "delta_gap_max": 0.2,
+    "fpr_gap_max": 0.05,
+    "regime_win_frac": 0.75
+  }
+}
