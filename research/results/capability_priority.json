@@ -1,0 +1,23 @@
+{
+  "P0": [
+    "Institutional checkpoint schema/version/staleness validation (ticket)",
+    "Orchestration models package restoration (ticket)",
+    "Unified experiment registry API",
+    "Brokerage/fee/slippage model pack"
+  ],
+  "P1": [
+    "Event-driven backtest parity (keep risk authority)",
+    "Multi-venue adapters",
+    "Portfolio constraints/correlation modules",
+    "Cancel/replace completeness",
+    "Process-level chaos injectors",
+    "INV-001 and INV-010 E2E research harnesses"
+  ],
+  "do_not_adopt": [
+    "Strategy-side risk override",
+    "LLM/agent final order authority",
+    "Silent corrupt checkpoint recovery",
+    "LIVE via offline fallback",
+    "Martingale risk ceiling raise"
+  ]
+}

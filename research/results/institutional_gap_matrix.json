@@ -1,0 +1,9 @@
+{
+  "missing_examples": ["L2_L3_books", "corporate_actions", "latency_modeling", "market_impact", "CPCV_PBO", "portfolio_optimization", "execution_algos_SOR"],
+  "superior_examples": ["experiment_metadata_reproducibility", "immutable_risk_authority", "ML_not_execution_authority", "authority_boundaries", "reproducibility_seeds_hashes"],
+  "benchmarks": {
+    "QuantConnect_LEAN": {"strengths": ["event-driven backtest", "brokerage models", "multi-broker live", "corporate actions"]},
+    "NautilusTrader": {"strengths": ["backtest/live parity", "multi-venue OMS", "L1/L2 books", "RiskEngine pre-trade"]},
+    "AlgoTrader_TT_OMS": {"strengths": ["institutional OMS/EMS", "pre-trade credit limits", "SOR/algos", "compliance audit"]}
+  }
+}

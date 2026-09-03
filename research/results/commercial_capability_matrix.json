@@ -1,0 +1,8 @@
+{
+  "experiment_id": "COMM-01",
+  "git_sha": "0497d80add7652463f6cb8d60f91599719061849",
+  "production_changed": false,
+  "total": 90,
+  "counts": {"EXISTS": 27, "PARTIAL": 45, "MISSING": 11, "SUPERIOR": 7, "UNKNOWN": 0},
+  "note": "Full per-capability rows generated in local harness; summary counts authoritative for COMM-01"
+}
