@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP-DR-04",
+  "git_sha": "44bceefc89af835d633f2b64d8a567a97667b1d1",
+  "classification": "HOLD",
+  "production_changed": false,
+  "determinism": "PASS",
+  "D6_count": 0,
+  "critical_finding": false,
+  "real_capital_readiness": "DO NOT ASSESS AS READY",
+  "metrics": {
+    "total_scenarios": 17,
+    "comparable_scenarios": 8,
+    "identical_decisions": 4,
+    "decision_concordance": 0.5,
+    "taxonomy_counts": {"MATCH": 4, "D1": 4, "D7": 9},
+    "metamorphic_pass": 10,
+    "metamorphic_total": 10,
+    "safety_invariant_checks_pass": true
+  },
+  "architecture": {
+    "canonical_authority": "NO single shared evaluate() — dual semantics",
+    "crypto": "src/crypto/risk/engine.py RiskEngine",
+    "adaptive": "god/risk/adaptive.py CapitalAdaptiveRiskEngine"
+  },
+  "findings": [
+    {"id": "F1", "taxonomy": "D1/D7", "summary": "Non-isomorphic RiskEngine vs AdaptiveRiskRequest; no production adapter"},
+    {"id": "F2", "taxonomy": "D5", "summary": "Adaptive has no SAFE_MODE/recon/DataQuality inputs"},
+    {"id": "F3", "taxonomy": "D1", "summary": "Different capital/risk_pct/position limit models"},
+    {"id": "F4", "taxonomy": "D7", "summary": "PaperRiskEngine is third semantics"}
+  ]
+}
