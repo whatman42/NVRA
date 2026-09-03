@@ -1,0 +1,11 @@
+{
+  "conclusion": "DUAL COMPUTATION across product paths — NOT dual authority within a single lifecycle",
+  "crypto_path": {
+    "risk_quantity": "RiskDecision.allowed_quantity",
+    "adaptive_involved": false
+  },
+  "mt5_demo_path": {
+    "volume_authority": "CapitalAdaptiveRiskEngine sole authority",
+    "LIVE": "always rejected"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "sizing": {
+    "crypto": "AUTHORITATIVE on crypto path",
+    "adaptive": "AUTHORITATIVE on MT5 demo path only",
+    "paper": "NOT APPLICABLE as separate sizer on crypto path",
+    "final_execution": "CONSUMES upstream size; may floor down",
+    "evidence": "E2 execution/engine.py; demo_pipeline.py"
+  },
+  "risk_approval": {
+    "crypto": "AUTHORITATIVE",
+    "adaptive": "AUTHORITATIVE on MT5 demo",
+    "final_execution": "VETO-ONLY final re-check"
+  },
+  "safety_veto": {
+    "crypto": "AUTHORITATIVE SafetyMode",
+    "adaptive": "NOT APPLICABLE",
+    "startup_control": "AUTHORITATIVE SAFE_MODE on stage fail"
+  },
+  "reconciliation": {
+    "crypto": "AUTHORITATIVE reconciliation_ok",
+    "adaptive": "NOT APPLICABLE",
+    "startup_control": "AUTHORITATIVE stage"
+  },
+  "data_quality": {
+    "crypto": "AUTHORITATIVE",
+    "adaptive": "NOT APPLICABLE"
+  },
+  "fallback": {
+    "startup_control": "evaluate_offline AUTHORITATIVE for offline mode",
+    "final_execution": "NOT OBSERVABLE E2E wiring"
+  },
+  "duplicate_suppression": {
+    "crypto": "AUTHORITATIVE ExecutionStore",
+    "evidence": "E2+E3 test_idempotent_resubmit"
+  },
+  "final_order_authority": {
+    "crypto": "AUTHORITATIVE ExecutionEngine",
+    "adaptive": "AUTHORITATIVE DemoOnlyExecutionPipeline"
+  },
+  "LIVE_authorization": {
+    "live_module": "AUTHORITATIVE LiveAuthorizationGate",
+    "adaptive": "LIVE always rejected on demo",
+    "INV-001_E2E": "NOT OBSERVABLE"
+  }
+}

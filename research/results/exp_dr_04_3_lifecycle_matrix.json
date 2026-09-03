@@ -1,0 +1,11 @@
+[
+  {"state": "INIT", "execution": "NO", "LIVE": "NO"},
+  {"state": "LICENSE_CHECK", "execution": "NO", "LIVE": "NO"},
+  {"state": "LOAD_STATE", "execution": "NO", "LIVE": "NO"},
+  {"state": "BROKER_CONNECT", "execution": "NO", "LIVE": "NO"},
+  {"state": "RECONCILIATION", "execution": "NO", "LIVE": "NO", "blocking": "fail→SAFE_MODE"},
+  {"state": "RISK_GOVERNOR", "execution": "NO", "LIVE": "NO"},
+  {"state": "READY", "execution": "NO_until_submit", "LIVE": "NO_default"},
+  {"state": "RUNNING", "execution": "YES_if_approved", "LIVE": "ONLY_if_explicit"},
+  {"state": "SAFE_MODE", "execution": "VETO", "LIVE": "NO"}
+]

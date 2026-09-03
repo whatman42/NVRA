@@ -1,0 +1,8 @@
+{
+  "INV-001": {"status": "UNOBSERVABLE end-to-end", "level": "partial E2 components only"},
+  "INV-002": {"status": "PASS", "level": "E3"},
+  "INV-003": {"status": "PASS", "level": "E2"},
+  "INV-004": {"status": "PASS", "level": "E3"},
+  "INV-008": {"status": "PASS on crypto ExecutionEngine", "level": "E3"},
+  "INV-010": {"status": "PASS at evaluate_offline API", "level": "E2", "note": "E2E wiring UNOBSERVABLE"}
+}

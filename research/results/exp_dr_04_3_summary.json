@@ -1,0 +1,11 @@
+{
+  "experiment_id": "EXP-DR-04.3",
+  "git_sha": "255e32b30583a0bd26a58bd24b201061ea4d1de5",
+  "production_changed": false,
+  "classification": "GO-MORE-DATA",
+  "d6_status": 0,
+  "authority_ambiguity": "REDUCED — path-scoped",
+  "dual_sizing_authority": "DUAL_COMPUTATION_NOT_DUAL_AUTHORITY_ON_ONE_SINK",
+  "paper_third_path": "YES for god paper; NO for crypto ExecutionMode.PAPER",
+  "evidence_levels_used": ["E2", "E3", "E4"]
+}
