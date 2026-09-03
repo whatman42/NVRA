@@ -1,0 +1,15 @@
+{
+  "experiment_id": "EXP-DR-03B",
+  "scenarios": {
+    "RiskEngine_identical_under_counterfactual_uncertainty_dict_only": true,
+    "MLRiskGate_differs": true,
+    "RiskEngine_A": {"verdict": "RiskVerdict.APPROVED", "executable": true},
+    "RiskEngine_B": {"verdict": "RiskVerdict.APPROVED", "executable": true},
+    "MLRiskGate_high_conf": {"allowed": true, "reason": "pass"},
+    "MLRiskGate_low_conf_same_probability": {"allowed": false, "reason": "confidence_below_min"}
+  },
+  "interpretation": {
+    "RiskEngine": "DISCONNECTED from UncertaintyReport",
+    "MLRiskGate": "GATE-ONLY — confidence can veto"
+  }
+}

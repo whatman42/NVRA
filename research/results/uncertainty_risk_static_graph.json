@@ -1,0 +1,22 @@
+{
+  "experiment_id": "EXP-DR-03B",
+  "nodes": [
+    "ML_Pipeline", "UncertaintyReport", "MLRiskGate", "OOD", "Calibration", "Prediction",
+    "TradeProposal", "AdaptiveRiskRequest", "RiskEngine.evaluate", "CapitalAdaptiveRiskEngine",
+    "SAFE_MODE", "ExecutionContract", "prediction_to_proposal", "DecisionPacket"
+  ],
+  "edges": [
+    {"from": "Calibration", "to": "Prediction", "kind": "TRANSFORM", "type": "BOTH"},
+    {"from": "OOD", "to": "Prediction", "kind": "GATE", "type": "BOTH"},
+    {"from": "Prediction", "to": "MLRiskGate", "kind": "GATE", "type": "BOTH"},
+    {"from": "MLRiskGate", "to": "PipelineResult.risk", "kind": "GATE", "type": "BOTH"},
+    {"from": "Prediction", "to": "prediction_to_proposal", "kind": "GATE", "type": "STATIC"},
+    {"from": "prediction_to_proposal", "to": "TradeProposal", "kind": "CONDITIONAL", "type": "STATIC"},
+    {"from": "TradeProposal", "to": "RiskEngine.evaluate", "kind": "INPUT", "type": "BOTH"},
+    {"from": "UncertaintyReport", "to": "RiskEngine.evaluate", "kind": "DISCONNECTED", "type": "NONE"},
+    {"from": "UncertaintyReport", "to": "AdaptiveRiskRequest", "kind": "DISCONNECTED", "type": "NONE"},
+    {"from": "MLRiskGate", "to": "RiskEngine.evaluate", "kind": "DISCONNECTED", "type": "NONE"},
+    {"from": "SAFE_MODE", "to": "RiskEngine.evaluate", "kind": "GATE", "type": "BOTH"}
+  ],
+  "connected_to_RiskEngine_from_UncertaintyReport": 0
+}

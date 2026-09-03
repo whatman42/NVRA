@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP-DR-03B",
+  "title": "Uncertainty \u2192 Risk Composition-Root Trace",
+  "status": "PASS",
+  "design": "CONFIRMATORY",
+  "hypothesis_H0": "Changing uncertainty holding other inputs constant does not change RiskEngine decision",
+  "hypothesis_H1": "Changing uncertainty changes RiskEngine decision",
+  "H0_result": "FAIL_TO_REJECT (RiskEngine layer DISCONNECTED)",
+  "coverage": {
+    "uncertainty_source_count": 8,
+    "connected_path_count": 0,
+    "indirect_path_count": 1,
+    "gate_only_count": 4,
+    "advisory_count": 2,
+    "disconnected_count": 1,
+    "unknown_count": 0
+  },
+  "safety": {
+    "can_raise_risk_ceiling": false,
+    "can_lower_risk_ceiling": false,
+    "can_bypass_RiskEngine": false,
+    "can_bypass_SAFE_MODE": false,
+    "can_bypass_reconciliation": false,
+    "can_influence_order_directly": false,
+    "only_upstream_veto": true,
+    "critical_ml_authority_increase": false
+  },
+  "architecture_class": "E_disconnected_UncertaintyReport_plus_C_gate_system",
+  "claim_CONNECTED": false,
+  "observed_connected_path_count": 0
+}
