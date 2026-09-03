@@ -1,0 +1,7 @@
+[
+  {"store": "InstitutionalCheckpointStore", "module": "god/institutional/checkpoint.py", "status": "USABLE", "integrity": "NONE"},
+  {"store": "CycleCheckpointStore", "module": "god/loop/checkpoint.py", "status": "USABLE", "integrity": "content_hash"},
+  {"store": "OrchestrationCheckpointStore", "module": "god/orchestration/checkpoint_store.py", "status": "BLOCKED", "reason": "models package missing"},
+  {"store": "ExecutionStore", "module": "src/crypto/execution/store.py", "status": "USABLE"},
+  {"store": "Startup LOAD_STATE", "module": "src/crypto/runtime/startup.py", "status": "PARTIAL"}
+]
