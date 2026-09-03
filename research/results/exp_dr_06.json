@@ -1,0 +1,11 @@
+{
+  "experiment_id": "EXP-DR-06",
+  "hypothesis": "Checkpoint corruption is fail-closed",
+  "status": "PASS",
+  "design": "CONFIRMATORY",
+  "cases": [
+    {"case": "valid", "pass": true},
+    {"case": "bit_corruption", "pass": true, "detail": "DatabaseError"},
+    {"case": "missing", "pass": true}
+  ]
+}

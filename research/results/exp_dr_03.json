@@ -1,0 +1,16 @@
+{
+  "connected_count": 0,
+  "conclusion": "Uncertainty module exists and gates allow_trade locally, but no direct parameter coupling into RiskEngine.evaluate or AdaptiveRiskRequest. PARTIAL/DISCONNECTED until composition-root wiring is proven.",
+  "design": "CONFIRMATORY",
+  "experiment_id": "EXP-DR-03",
+  "hypothesis": "Uncertainty is an information-bearing control signal into risk",
+  "observed": 0,
+  "pass_threshold": 1,
+  "primary_metric": "connected_path_count",
+  "status": "FAIL",
+  "paths": [
+    {"path": "ml.uncertainty.evaluate_uncertainty", "classification": "PARTIAL"},
+    {"path": "crypto.risk.engine.RiskEngine.evaluate", "classification": "DISCONNECTED_FROM_UNCERTAINTY_MODULE"},
+    {"path": "god.risk.adaptive.CapitalAdaptiveRiskEngine", "classification": "DISCONNECTED_FROM_UNCERTAINTY_MODULE"}
+  ]
+}

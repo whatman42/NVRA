@@ -1,0 +1,8 @@
+{
+  "experiment_id": "EXP-DR-04",
+  "status": "INCONCLUSIVE",
+  "same_signature": false,
+  "classification": "UNDEFINED",
+  "agreement_rate": null,
+  "note": "APIs non-isomorphic; runtime concordance requires shared fixture adapter"
+}

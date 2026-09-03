@@ -1,0 +1,6 @@
+{
+  "experiment_id": "EXP-DR-05",
+  "status": "INCONCLUSIVE",
+  "design": "EXPLORATORY",
+  "note": "chaos_v7 defines market price-shock scenarios only; process fault injectors N=0"
+}

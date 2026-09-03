@@ -1,0 +1,8 @@
+{
+  "experiment_id": "EXP-DR-02",
+  "status": "PASS",
+  "passed": 7,
+  "total": 7,
+  "design": "EXPLORATORY",
+  "hypothesis": "Core invariants hold under API-level probes"
+}

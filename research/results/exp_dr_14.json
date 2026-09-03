@@ -1,0 +1,13 @@
+{
+  "experiment_id": "EXP-DR-14",
+  "design": "CONFIRMATORY",
+  "mutation_reject_rate": 1.0,
+  "pass_threshold": 1.0,
+  "status": "PASS",
+  "cases": [
+    {"case": "valid", "ok": true, "eligible": true, "pass": true, "reasons": []},
+    {"case": "byte_mut", "ok": false, "eligible": false, "pass": true, "reasons": ["artifact_hash_mismatch"]},
+    {"case": "ds", "ok": false, "eligible": false, "pass": true, "reasons": ["dataset_hash_mismatch"]},
+    {"case": "bad_status", "ok": false, "eligible": false, "pass": true, "reasons": ["job_status_not_success:FAILED"]}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "N": 3,
+  "design": "CONFIRMATORY",
+  "different_seed_changes_hash": true,
+  "equal_abc": true,
+  "experiment_id": "EXP-DR-01",
+  "hypothesis": "Identical seed+config yields identical state hash",
+  "scope": "synthetic_deterministic_pipeline_not_full_product_replay",
+  "status": "PASS"
+}

@@ -1,0 +1,6 @@
+{
+  "experiment_id": "EXP-DR-07",
+  "status": "PASS",
+  "design": "EXPLORATORY",
+  "primary_metric": "ece_raw vs ece_calibrated"
+}
