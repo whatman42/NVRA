@@ -1,0 +1,21 @@
+{
+  "experiment_id": "EXP-DR-04.1",
+  "git_sha": "646bd535f173eb72a362b8c47dac733209766a7a",
+  "production_changed": false,
+  "classification": "HOLD",
+  "authority_ambiguity": true,
+  "canonical_concept_count": 26,
+  "equivalence_counts": {"E0": 2, "E1": 1, "E2": 10, "E3": 3, "E4": 10},
+  "d7_original": 9,
+  "d7_resolvable": 7,
+  "d7_fundamental": 2,
+  "schema": {
+    "name": "CanonicalRiskContract_v0_research_only",
+    "groups": ["ACCOUNT_STATE", "POSITION_STATE", "TRADE_RISK", "DATA_STATE", "CONTROL_STATE", "DECISION"],
+    "non_goals": ["Not a production API", "Not a merge of RiskEngines", "Does not authorize LIVE", "Does not raise risk ceilings"]
+  },
+  "recommendation": {
+    "EXP_DR_04_2_justified": true,
+    "production_implementation": "NO"
+  }
+}

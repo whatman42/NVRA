@@ -1,0 +1,13 @@
+{
+  "git_sha": "646bd535f173eb72a362b8c47dac733209766a7a",
+  "authority_ambiguity": true,
+  "matrix": [
+    {"decision": "position_sizing", "crypto": "RiskEngine allowed_quantity", "god": "CapitalAdaptiveRiskEngine volume", "resolution": "UNKNOWN composition-root dependent"},
+    {"decision": "portfolio_exposure_limits", "crypto": "RiskPolicy max_*_exposure_pct", "god": "ExposureLimits max_total_exposure_lots", "resolution": "DUAL different units"},
+    {"decision": "safety_gating", "crypto": "SafetyMode", "god_adaptive": "ABSENT", "god_live": "LiveAuthorizationGate.safe_mode", "resolution": "crypto path + live"},
+    {"decision": "reconciliation_gating", "crypto": "reconciliation_ok", "god": "ABSENT", "resolution": "crypto path owns"},
+    {"decision": "data_quality_gating", "crypto": "DataQualityReport", "god": "ABSENT", "resolution": "crypto path owns"},
+    {"decision": "LIVE_authorization", "crypto": "NOT inside RiskEngine", "god": "LiveAuthorizationGate", "resolution": "god.live owns"},
+    {"decision": "final_order_approval", "crypto": "RiskDecision.executable", "god": "AdaptiveRiskResult.ok", "live": "can_submit_live", "resolution": "UNKNOWN path-dependent"}
+  ]
+}

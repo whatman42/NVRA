@@ -1,0 +1,16 @@
+{
+  "git_sha": "646bd535f173eb72a362b8c47dac733209766a7a",
+  "equivalence_counts": {"E0": 2, "E1": 1, "E2": 10, "E3": 3, "E4": 10},
+  "concept_count": 26,
+  "key_E0": ["equity", "max_concurrent_positions"],
+  "key_E3": ["gross_exposure lots vs currency", "max_daily_loss abs vs pct", "portfolio exposure lots vs pct"],
+  "key_E4": ["safety_mode", "reconciliation_ok", "data_quality", "live_authorization on RiskEngine", "leverage on crypto snapshot", "risk_budget first-class", "side on adaptive"],
+  "invariants_summary": {
+    "INV-001": "live IMPLEMENTED; crypto PARTIAL; adaptive N/A",
+    "INV-002": "crypto IMPLEMENTED; adaptive ABSENT",
+    "INV-003": "both IMPLEMENTED on their surfaces",
+    "INV-004": "crypto IMPLEMENTED; adaptive ABSENT",
+    "INV-008": "PARTIAL outside evaluate APIs",
+    "INV-010": "UNKNOWN control-plane"
+  }
+}
