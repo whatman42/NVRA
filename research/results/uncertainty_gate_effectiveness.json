@@ -1,0 +1,38 @@
+{
+  "experiment_id": "EXP-DR-03C",
+  "git_commit": "4b902bc180e373ead0121a890402e40c6cc90d22",
+  "seed": 42,
+  "design": "EXPLORATORY SYNTHETIC EVIDENCE",
+  "n_total": 2100,
+  "H0": "Gated eligibility is independent of confidence/OOD labels",
+  "H1": "Gated eligibility differs systematically with confidence/OOD",
+  "practical_delta_threshold": 0.15,
+  "overall_metrics": {
+    "n": 2100,
+    "gate_veto_rate": 0.7495238095238095,
+    "delta_allow_good_minus_bad": 0.3509629943673915,
+    "false_veto_rate_fnr": 0.5382775119617225,
+    "false_allow_rate_fpr": 0.11075949367088607,
+    "practically_informative": true
+  },
+  "counterfactual": {
+    "causal_ml_gate": true,
+    "causal_ood_gate": true,
+    "prediction_probability_fixed": 0.7
+  },
+  "threshold_sensitivity": {
+    "stability": {
+      "fragile": false
+    }
+  },
+  "classification": "HOLD — CALIBRATION/THRESHOLD RESEARCH",
+  "claim_market_validated": false,
+  "production_changed": false,
+  "gate_inventory": {
+    "MLRiskGate": "HARD VETO",
+    "OOD": "HARD VETO",
+    "evaluate_uncertainty": "DISCONNECTED",
+    "calibration": "SOFT/INDIRECT",
+    "drift": "ADVISORY"
+  }
+}
