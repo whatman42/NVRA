@@ -1,26 +1,47 @@
-# COMM-01 — Institutional Capability Roadmap
+# COMM-01 — Institutional Roadmap
 
-**Non-implementing plan.** Production unchanged in COMM-01.
+**Implementation is OUT OF SCOPE for COMM-01.** Sequencing guidance only.
 
-## PHASES
+## PHASE I — Foundation
+- Checkpoint schema/integrity gates (institutional store)
+- Orchestration models engineering ticket
+- Authority/ops runbook
+- Expand deterministic recovery tests
 
-**I Foundation** — orch models ticket; checkpoint schema design; operator authority docs; freeze invariants as gates.
+## PHASE II — Institutional Research
+- Deeper event-driven research harness
+- CPCV/PBO/walk-forward CI packaging
+- Dataset/artifact catalog hardening
+- OOS/regime robustness packs
 
-**II Institutional Research** — experiment runner; brokerage models; walk-forward/OOS; CPCV/PBO libraries.
+## PHASE III — Portfolio / Risk
+- Portfolio constraint tooling (still under RiskEngine)
+- CVaR/ES **research** toolkit
+- Liquidity risk research models (advisory until proven)
 
-**III Portfolio/Risk** — constraints, concentration, CVaR research (no live ceiling changes); post-trade analytics.
+## PHASE IV — OMS / EMS / Execution
+- Cancel/replace completeness
+- Execution algo library **subordinate to risk**
+- Connector expansion
+- TCA analytics
 
-**IV OMS/EMS/Execution** — cancel/replace depth; multi-venue adapters; external SOR via controlled adapters; never bypass RiskEngine.
+## PHASE V — Distributed Research
+- Provider farm hardening (Colab/Kaggle/local)
+- Artifact object storage adapters (optional)
+- Experiment comparison UX
 
-**V Distributed Research** — artifact store; workers; ResourceGovernor-aware jobs.
+## PHASE VI — Agentic Research
+- Advisory agents only
+- Human/governance boundary tests
+- No agent execution authority
 
-**VI Agentic Research** — advisory only; Evidence→Decision→Governance→Risk unchanged.
+## PHASE VII — Production Institutionalization
+- Observability/alerting productization
+- Multi-tenant control plane productionization
+- Process HA/MTTR program
+- External audit packages
 
-**VII Production Institutionalization** — only after INV-001/010 E2E + process recovery evidence; RBAC deepen; SRE/MTTR.
-
-## P0
-
-- Institutional checkpoint schema/version/staleness validation (design→ticket)
-- Orchestration models package restoration (engineering ticket)
-- Unified experiment registry API (research→product)
-- Brokerage/fee/slippage model pack (optional research models)
+## Explicit non-goals
+- No LIVE enablement via research
+- No safety invariant weakening
+- No spontaneous production fixes for EXP-DR findings inside research commits

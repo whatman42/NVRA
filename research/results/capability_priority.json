@@ -1,23 +1,18 @@
 {
-  "P0": [
-    "Institutional checkpoint schema/version/staleness validation (ticket)",
-    "Orchestration models package restoration (ticket)",
-    "Unified experiment registry API",
-    "Brokerage/fee/slippage model pack"
-  ],
-  "P1": [
-    "Event-driven backtest parity (keep risk authority)",
-    "Multi-venue adapters",
-    "Portfolio constraints/correlation modules",
-    "Cancel/replace completeness",
-    "Process-level chaos injectors",
-    "INV-001 and INV-010 E2E research harnesses"
-  ],
-  "do_not_adopt": [
-    "Strategy-side risk override",
-    "LLM/agent final order authority",
-    "Silent corrupt checkpoint recovery",
-    "LIVE via offline fallback",
-    "Martingale risk ceiling raise"
+  "priorities": [
+    {"id": "P0-1", "capability": "Institutional checkpoint schema/version/staleness gates", "priority": "P0", "adoption": "ADAPT TO NVRA"},
+    {"id": "P0-2", "capability": "Orchestration models package repair (engineering ticket)", "priority": "P0", "adoption": "ADOPT NOW"},
+    {"id": "P0-3", "capability": "Documented single composition-root authority map (ops)", "priority": "P0", "adoption": "ADAPT TO NVRA"},
+    {"id": "P1-1", "capability": "Event-driven backtest/live parity engine depth", "priority": "P1", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P1-2", "capability": "L2 book / microstructure simulation (research)", "priority": "P1", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P1-3", "capability": "INV-001 E2E LIVE precondition research instrumentation", "priority": "P1", "adoption": "ADAPT TO NVRA"},
+    {"id": "P1-4", "capability": "INV-010 fallback to ExecutionMode.LIVE E2E wiring proof", "priority": "P1", "adoption": "ADAPT TO NVRA"},
+    {"id": "P1-5", "capability": "Process-level fault injectors / MTTR measurement", "priority": "P1", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P2-1", "capability": "Execution algorithms TWAP/VWAP/POV (behind risk)", "priority": "P2", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P2-2", "capability": "Multi-venue / multi-broker connector expansion", "priority": "P2", "adoption": "EXTERNAL SERVICE ONLY / ADAPT"},
+    {"id": "P2-3", "capability": "Portfolio optimization / CVaR research toolkit", "priority": "P2", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P2-4", "capability": "Fill-quality / TCA analytics", "priority": "P2", "adoption": "ADOPT AFTER RESEARCH"},
+    {"id": "P3-1", "capability": "Managed cloud GPU research farm", "priority": "P3", "adoption": "EXTERNAL SERVICE ONLY"},
+    {"id": "P3-2", "capability": "Full desk OMS UX / blotter product", "priority": "P3", "adoption": "ADOPT AFTER RESEARCH"}
   ]
 }

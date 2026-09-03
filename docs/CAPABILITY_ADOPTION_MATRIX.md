@@ -1,37 +1,32 @@
 # COMM-01 — Capability Adoption Matrix
 
-## Classes
+Legend: **A** ADOPT NOW · **B** ADOPT AFTER RESEARCH · **C** ADAPT TO NVRA · **D** ALREADY COVERED · **E** NOT WORTH · **F** EXTERNAL ONLY · **G** REJECT (safety/governance)
 
-A ADOPT NOW · B ADOPT AFTER RESEARCH · C ADAPT TO NVRA · D ALREADY COVERED · E NOT WORTH · F EXTERNAL SERVICE ONLY · G REJECT
+| Capability | Class | Rationale |
+|------------|-------|-----------|
+| Checkpoint schema/version/staleness | C | EXP-DR-06; strengthens fail-closed |
+| Orchestration models package | A | Eng ticket; restore import |
+| Composition-root authority runbook | C | EXP-DR-04.3 residual |
+| Event-driven BT/live parity depth | B | Nautilus/LEAN-class; keep risk gate |
+| L2 microstructure sim | B | Research sandbox only |
+| INV-001 E2E instrumentation | C | Research-only |
+| INV-010 E2E wiring proof | C | Research-only |
+| Process fault injectors | B | EXP-DR-05 gap |
+| TWAP/VWAP/POV behind RiskEngine | B | Never bypass risk |
+| Multi-broker connectors | F/C | Prefer adapters |
+| Portfolio opt / CVaR toolkit | B | Research layer |
+| TCA / fill quality | B | Analytics only |
+| Managed GPU cloud | F | External providers exist |
+| Desk OMS full UX | B | Large surface |
+| Data quality veto | D | SUPERIOR |
+| Idempotent client orders | D | INV-008 |
+| SAFE_MODE / recon gates | D | EXISTS |
+| Scientific evidence packages | D | SUPERIOR |
+| Agent final authority | G | Safety |
+| ML ceiling raise | G | INV-003 |
+| Fallback LIVE | G | INV-010 |
+| Skip RiskEngine submit | G | Architecture |
+| Silent corrupt checkpoint | G | EXP-DR-06 |
+| Disable idempotency | G | INV-008 |
 
-## Selected mappings
-
-| Capability | NVRA | Adoption |
-|------------|------|----------|
-| Deterministic experiment evidence | SUPERIOR | D |
-| Immutable risk path | SUPERIOR | D |
-| Idempotent orders | EXISTS | D |
-| Brokerage fee/slippage models | PARTIAL | C |
-| Event-driven backtest depth | PARTIAL | C |
-| L2/L3 books | MISSING | B |
-| CPCV/PBO | MISSING | B |
-| Portfolio optimizer | MISSING | B |
-| SOR/execution algos | MISSING | F |
-| Agent final authority | — | G |
-| Silent corrupt recovery | — | G |
-| LIVE via fallback | — | G |
-| Checkpoint schema gates | PARTIAL | A (ticket; not spontaneous) |
-| Orch models package | BLOCKED | A (**separate ticket**) |
-
-## Top 10 NOT to adopt
-
-1. Strategy-side risk override bypassing RiskEngine
-2. LLM/agent as final order authority
-3. Silent recovery accepting corrupt checkpoints
-4. LIVE enable from offline fallback
-5. Auto-raise risk ceiling after losses
-6. Merged dual RiskEngine without authority design
-7. Invented SAFE_MODE on adaptive without design
-8. Cloud-only lock-in removing local-first
-9. Removing fail-closed defaults for convenience
-10. Marketing paper performance as live validation
+Full priority scores: `research/results/capability_priority.json`

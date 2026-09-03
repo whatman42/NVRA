@@ -1,9 +1,31 @@
 {
-  "missing_examples": ["L2_L3_books", "corporate_actions", "latency_modeling", "market_impact", "CPCV_PBO", "portfolio_optimization", "execution_algos_SOR"],
-  "superior_examples": ["experiment_metadata_reproducibility", "immutable_risk_authority", "ML_not_execution_authority", "authority_boundaries", "reproducibility_seeds_hashes"],
-  "benchmarks": {
-    "QuantConnect_LEAN": {"strengths": ["event-driven backtest", "brokerage models", "multi-broker live", "corporate actions"]},
-    "NautilusTrader": {"strengths": ["backtest/live parity", "multi-venue OMS", "L1/L2 books", "RiskEngine pre-trade"]},
-    "AlgoTrader_TT_OMS": {"strengths": ["institutional OMS/EMS", "pre-trade credit limits", "SOR/algos", "compliance audit"]}
-  }
+  "experiment_id": "COMM-01",
+  "baseline": "0497d80",
+  "rejects": [
+    "LLM/agent as final order authority",
+    "Auto-raise risk ceiling from ML confidence",
+    "Bypass SAFE_MODE for speed",
+    "LIVE via offline fallback",
+    "Order without reconciliation-ready",
+    "Silent corrupt checkpoint accept",
+    "Direct broker submit skipping RiskEngine",
+    "Unscoped dual sizing on one sink",
+    "Disable idempotency for throughput",
+    "Trust UNKNOWN data for live entries"
+  ],
+  "benchmark_platforms": [
+    {"name": "QuantConnect/LEAN", "source": "https://www.lean.io/ + QC docs"},
+    {"name": "NautilusTrader", "source": "https://nautilustrader.io/docs/"},
+    {"name": "AlgoTrader/OEMS class", "source": "vendor materials"},
+    {"name": "TT/Elwood EMS class", "source": "vendor sites"}
+  ],
+  "top_gap_themes": [
+    "checkpoint schema gates",
+    "orchestration models missing",
+    "backtest/live parity depth",
+    "L2 microstructure",
+    "execution algos/SOR",
+    "process MTTR",
+    "INV-001/010 E2E"
+  ]
 }

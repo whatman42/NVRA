@@ -1,8 +1,47 @@
 {
   "experiment_id": "COMM-01",
-  "git_sha": "0497d80add7652463f6cb8d60f91599719061849",
-  "production_changed": false,
-  "total": 90,
-  "counts": {"EXISTS": 27, "PARTIAL": 45, "MISSING": 11, "SUPERIOR": 7, "UNKNOWN": 0},
-  "note": "Full per-capability rows generated in local harness; summary counts authoritative for COMM-01"
+  "git_baseline": "0497d80add7652463f6cb8d60f91599719061849",
+  "total": 136,
+  "counts": {
+    "EXISTS": 40,
+    "PARTIAL": 70,
+    "MISSING": 14,
+    "SUPERIOR": 12,
+    "UNKNOWN": 0
+  },
+  "note": "Full per-capability rows generated in COMM-01 audit harness; statuses are evidence-based from god/, src/crypto/, tests, and EXP-DR results. Prefer code/test/EXP-DR over README-only claims.",
+  "domains": [
+    "A_MARKET_DATA",
+    "B_RESEARCH",
+    "C_PORTFOLIO",
+    "D_RISK",
+    "E_OMS",
+    "F_EXEC",
+    "G_ML",
+    "H_REL",
+    "I_SCI",
+    "J_GOV",
+    "K_INFRA",
+    "L_OPS"
+  ],
+  "superior_examples": [
+    "stale_data_handling",
+    "immutable_risk_authority",
+    "fail_closed_behavior",
+    "experiment_metadata",
+    "reproducibility",
+    "evidence_package",
+    "authority_boundaries",
+    "human_governance_boundary"
+  ],
+  "missing_examples": [
+    "L1_L2_L3_readiness",
+    "execution_algorithms",
+    "SOR_readiness",
+    "portfolio_optimization",
+    "CVaR_ES_research",
+    "latency_modeling",
+    "market_impact",
+    "process_MTTR"
+  ]
 }
