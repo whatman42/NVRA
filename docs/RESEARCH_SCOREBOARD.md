@@ -4,11 +4,10 @@
 |------------|--------|--------|-------|
 | EXP-DR-01 Deterministic replay | **PASS** | Confirmatory | Synthetic hash equality |
 | EXP-DR-02 Invariant probes | **PASS** | Exploratory | API-level INVs |
-| EXP-DR-03 Uncertainty→risk paths | **FAIL** | Confirmatory | connected_path_count=0 |
-| EXP-DR-03B Trace | **PASS** | Confirmatory | DISCONNECTED + GATE-ONLY |
-| EXP-DR-03C / 03C.1 / 03C.2 | **HOLD** | Exploratory synthetic | Gates informative; FNR bottleneck |
-| EXP-DR-04 Dual-stack concordance | **HOLD** | Research audit | 50% concordance; D6=0 |
-| **EXP-DR-04.1 Canonical contract** | **HOLD** | Design only | 26 concepts; authority still ambiguous |
+| EXP-DR-03 / 03B / 03C series | **HOLD**/FAIL | Mixed | Uncertainty disconnected; gates HOLD |
+| EXP-DR-04 Dual-stack concordance | **HOLD** | Research audit | 50% on 8 comparable; D6=0 |
+| EXP-DR-04.1 Canonical contract | **HOLD** | Design only | 26 concepts; authority ambiguous |
+| **EXP-DR-04.2 Expanded concordance** | **HOLD** | Research harness | 108 scenarios; 75.3% engine concordance |
 | EXP-DR-05 Chaos recovery | INCONCLUSIVE | Exploratory | No process injectors |
 | EXP-DR-06 Checkpoint corruption | **PASS** | Confirmatory | Fail-closed |
 | EXP-DR-07 Calibration shift | **PASS** | Exploratory | Synthetic |
@@ -16,17 +15,19 @@
 | EXP-DR-14 Promotion mutation | **PASS** | Confirmatory | 100% reject |
 | EXP-DR-18 Kill/restart | INCONCLUSIVE | Exploratory | Static only |
 
-## EXP-DR-04.1 detail
+## EXP-DR-04.2 detail
 
 | Field | Value |
 |-------|-------|
-| Concepts | 26 |
-| E0/E1/E2/E3/E4 | 2/1/10/3/10 |
-| D7 resolvable / fundamental | 7 / 2 |
+| Scenarios | 108 |
+| Comparable | 89 |
+| Engine concordance | 75.3% |
+| D1 / D7 / D6 | 22 / 19 / 0 |
+| Metamorphic | 20/20 |
 | Authority ambiguity | **YES** |
-| 04.2 justified | YES (research-only harness) |
+| Dual sizing | **YES** |
 | Production implementation | **NO** |
 
 ## Priority
 
-Document dual authorities; optional EXP-DR-04.2 research concordance with contract overlays. No engine merge. No UncertaintyReport→RiskEngine. No 03D.
+Document dual authorities; do not merge engines. No UncertaintyReport→RiskEngine. No 03D. Canonical contract remains research-only.

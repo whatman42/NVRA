@@ -1,0 +1,10 @@
+{
+  "position_sizing": {"status": "DUAL_AUTHORITY_CANDIDATE", "crypto": "allowed_quantity", "adaptive": "volume"},
+  "portfolio_risk": {"status": "DUAL_AUTHORITY_CANDIDATE", "note": "pct vs lots E3"},
+  "safety": {"status": "SPLIT", "crypto": "SafetyMode", "adaptive": "UNAVAILABLE", "live": "LiveAuthorizationGate"},
+  "reconciliation": {"status": "CRYPTO_PATH"},
+  "data_quality": {"status": "CRYPTO_PATH"},
+  "final_approval": {"status": "DUAL_AUTHORITY_CANDIDATE"},
+  "lots_currency": {"status": "LOSSY_INSTRUMENT_DEPENDENT"},
+  "paper_third_path": {"status": "YES"}
+}

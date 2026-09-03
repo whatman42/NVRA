@@ -1,0 +1,29 @@
+{
+  "experiment_id": "EXP-DR-04.2",
+  "git_sha": "d1d66d97a721d9b586bb6f931ae81dd355d3e6eb",
+  "seed": 13,
+  "production_changed": false,
+  "n_scenarios": 108,
+  "comparable": 89,
+  "non_comparable": 19,
+  "engine_concordance": 0.7528089887640449,
+  "overlay_concordance": 0.7870370370370371,
+  "taxonomy_counts": {"MATCH": 67, "D1": 22, "D7": 19},
+  "d6_count": 0,
+  "metamorphic_pass": 20,
+  "metamorphic_total": 20,
+  "classification": "HOLD",
+  "authority_ambiguity": true,
+  "dual_sizing_authority": "YES",
+  "lots_currency": "LOSSY / instrument-dependent",
+  "paper_third_path": "YES",
+  "reproducibility": "PASS",
+  "invariants": {
+    "INV-001": "UNOBSERVABLE",
+    "INV-002": "PASS crypto",
+    "INV-003": "PASS both surfaces",
+    "INV-004": "PASS crypto; N/A adaptive native",
+    "INV-008": "UNOBSERVABLE",
+    "INV-010": "UNOBSERVABLE"
+  }
+}
