@@ -1,0 +1,17 @@
+{
+  "stage": "STAGE-4.1",
+  "verdict": "GO-MORE-DATA",
+  "statuses": {
+    "dataset_content_hash": "PASS",
+    "dataset_immutability_leakage": "PASS",
+    "data_quality_gates": "PASS",
+    "artifact_validation": "PASS",
+    "experiment_reproducibility": "PASS",
+    "research_execution_boundary": "PASS",
+    "data_ingest_validation_surface": "PASS"
+  },
+  "external_providers": "UNOBSERVABLE",
+  "l2_microstructure": "GAP → Stage 7 if needed",
+  "scientific_validity": "EXISTING_CAPABILITY — not full statistical certification",
+  "production_semantics_changed": false
+}
