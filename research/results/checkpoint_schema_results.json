@@ -1,0 +1,6 @@
+{
+  "required_fields": ["lifecycle", "recon_complete", "schema_version", "sequence", "updated_ns"],
+  "supported_schema": ["1.0"],
+  "production_enforced": false,
+  "research_policy": true
+}

@@ -1,0 +1,18 @@
+{
+  "stage": "TAHAP-3",
+  "verdict": "GO-MORE-DATA",
+  "git_sha": "cfb31f598797603264d46ac73f8d0b44c1f53176",
+  "state_stores": 5,
+  "semantic_cases": 20,
+  "unsafe_ready": 0,
+  "unsafe_execution": 0,
+  "production_accepts_invalid_json_count": 19,
+  "production_semantic_enforced": false,
+  "duplicate_effects": 0,
+  "crash_scenarios": 12,
+  "INV-001": "UNOBSERVABLE",
+  "INV-010": "UNOBSERVABLE",
+  "orchestration_models": "BLOCKED",
+  "production_changed": false,
+  "process_os_kill_mttr": "NOT_OBSERVABLE"
+}

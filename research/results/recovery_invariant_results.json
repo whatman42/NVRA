@@ -1,0 +1,7 @@
+{
+  "INV-001_E2E": "UNOBSERVABLE",
+  "INV-010_E2E": "UNOBSERVABLE",
+  "INV-008": {"duplicate_effects": 0, "pass": true},
+  "INV-002": {"unknown_blocks": true},
+  "INV-004": {"safe_mode_blocks": true}
+}

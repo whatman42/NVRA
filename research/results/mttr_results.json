@@ -1,0 +1,5 @@
+{
+  "process_os_kill_mttr": "NOT_OBSERVABLE",
+  "scope": "in_process_sim_only",
+  "evidence": "E4_component"
+}

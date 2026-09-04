@@ -1,0 +1,7 @@
+[
+  {"name": "InstitutionalCheckpointStore", "status": "USABLE", "semantic_enforcement_production": false},
+  {"name": "CycleCheckpointStore", "status": "USABLE", "checksum": "content_hash"},
+  {"name": "OrchestrationCheckpointStore", "status": "BLOCKED", "blocker": "models package missing"},
+  {"name": "ExecutionStore", "status": "USABLE"},
+  {"name": "Startup LOAD_STATE", "status": "PARTIAL"}
+]

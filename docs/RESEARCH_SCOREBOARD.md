@@ -1,18 +1,18 @@
-# Research Scoreboard (Phase 0–1)
+# Research Scoreboard
 
-| Experiment | Status | Design | Notes |
-|------------|--------|--------|-------|
-| EXP-DR-01…06 | Mixed | Research | See prior |
-| COMM-01 Institutional benchmark | **GO-MORE-DATA** | Audit | 136 capabilities |
-| **Tahap 2 Scientific verification** | **GO-MORE-DATA** | E4 harness | 11/11 replay; 7/7 properties; 61% pipeline |
+| Experiment | Status | Notes |
+|------------|--------|-------|
+| COMM-01 | GO-MORE-DATA | 136 capabilities |
+| Tahap 2 Scientific verification | GO-MORE-DATA | 11/11 replay; 61% pipeline |
+| **Tahap 3 State/Checkpoint/Recovery** | **GO-MORE-DATA** | Semantic policy E4; production schema NOT enforced |
 
-## Tahap 2 detail
+## Tahap 3 detail
 
 | Field | Value |
 |-------|-------|
 | Verdict | **GO-MORE-DATA** |
-| Replay | 11/11 PASS |
-| Properties | 7/7 |
-| Coverage | 61.1% |
-| Scope | INTEGRATED_PARTIAL |
+| Semantic cases | 20 |
+| Research unsafe READY/exec | 0/0 |
+| Production semantic enforced | **False** |
+| INV-001/010 E2E | UNOBSERVABLE |
 | Production | UNCHANGED |
