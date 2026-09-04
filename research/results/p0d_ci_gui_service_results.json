@@ -1,0 +1,15 @@
+{
+  "ci_prior": {"CI_run": 33831162386, "conclusion": "failure", "root_cause": "missing phase0 result files", "security_scan": "success"},
+  "gui_arm": {"qt_e2e": "GUI_E2E_UNOBSERVABLE", "composition_root": "LiveExecutionController + LiveAuthorizationGate", "local_tests": "PASS"},
+  "service_resume": {"windows_task_scheduler": "SERVICE_E2E_UNOBSERVABLE", "linux_systemd": "SERVICE_E2E_UNOBSERVABLE", "subprocess_sigkill_recover": "PASS"},
+  "production_live_verified": "NOT_VERIFIED",
+  "unsafe_live": 0,
+  "unauthorized_execution": 0,
+  "fallback_to_live": 0,
+  "local_regression": "992 passed, 1 skipped",
+  "INV-001": "PASS_E2E_COMPOSITION",
+  "INV-010": "PASS_E2E_COMPOSITION",
+  "stage2": "GO-MORE-DATA",
+  "stage3": "GO-MORE-DATA",
+  "p0d_verdict": "GO-MORE-DATA"
+}

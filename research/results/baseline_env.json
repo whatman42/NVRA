@@ -1,0 +1,5 @@
+{
+  "schema": "phase0_baseline_env_v1",
+  "purpose": "research phase0 environment baseline for smoke presence checks",
+  "production_authority": false
+}
