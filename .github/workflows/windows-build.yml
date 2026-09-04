@@ -45,7 +45,7 @@ jobs:
       - name: Set Python module paths
         shell: pwsh
         run: |
-          "PYTHONPATH=$env:GITHUB_WORKSPACE;$env:GITHUB_WORKSPACE\src" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "PYTHONPATH=$env:GITHUB_WORKSPACE;$env:GITHUB_WORKSPACE\\src" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: GUI import smoke
         shell: pwsh
@@ -78,7 +78,7 @@ jobs:
         run: |
           function Invoke-NvraCli([string]$CliArg) {
             $p = Start-Process `
-              -FilePath ".\dist\NVRA.exe" `
+              -FilePath ".\\dist\\NVRA.exe" `
               -ArgumentList $CliArg `
               -Wait `
               -PassThru `
@@ -94,6 +94,46 @@ jobs:
           Invoke-NvraCli "--version"
           Invoke-NvraCli "--health"
           Invoke-NvraCli "--check-config"
+
+      - name: Actual NVRA.exe headless composition (PAPER)
+        shell: pwsh
+        run: |
+          $results = @()
+          for ($i = 0; $i -lt 20; $i++) {
+            $p = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" `
+              -Wait -PassThru -WindowStyle Hidden
+            Write-Host "NVRA --headless run=$i ExitCode=$($p.ExitCode)"
+            if ($null -eq $p.ExitCode -or $p.ExitCode -ne 0) {
+              throw "NVRA --headless failed run=$i exit=$($p.ExitCode)"
+            }
+            $results += $p.ExitCode
+          }
+          $unique = ($results | Select-Object -Unique).Count
+          if ($unique -ne 1) { throw "non-deterministic headless exit codes: $($results -join ',')" }
+          Write-Host "HEADLESS_COMPOSITION_PASS runs=20 exit=0 live=false"
+
+      - name: Actual NVRA.exe process kill/restart recovery
+        shell: pwsh
+        run: |
+          for ($i = 0; $i -lt 5; $i++) {
+            $p = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" `
+              -PassThru -WindowStyle Hidden
+            Start-Sleep -Milliseconds 200
+            if (-not $p.HasExited) {
+              Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+              try { $p.WaitForExit(5000) } catch {}
+              Write-Host "killed pid=$($p.Id) run=$i"
+            } else {
+              Write-Host "exited-before-kill code=$($p.ExitCode) run=$i"
+            }
+            $p2 = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" `
+              -Wait -PassThru -WindowStyle Hidden
+            Write-Host "restart ExitCode=$($p2.ExitCode) run=$i"
+            if ($null -eq $p2.ExitCode -or $p2.ExitCode -ne 0) {
+              throw "NVRA --headless restart failed run=$i exit=$($p2.ExitCode)"
+            }
+          }
+          Write-Host "PROCESS_RECOVERY_PASS runs=5 live=false"
 
       - name: SHA-256 + manifest
         shell: pwsh
