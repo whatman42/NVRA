@@ -1,0 +1,19 @@
+{
+  "INV-001": "PASS_E2E_COMPOSITION",
+  "INV-010": "PASS_E2E_COMPOSITION",
+  "unsafe_live_count": 0,
+  "fallback_to_live_count": 0,
+  "unauthorized_execution_count": 0,
+  "reconciliation_bypass_count": 0,
+  "safe_mode_escape_count": 0,
+  "notes": [
+    "Composition: LiveAuthorizationGate AND ProductionGate AND RiskEngine AND Checkpoint AND evaluate_offline",
+    "Full NVRAFX GUI operator ARM path remains partial",
+    "Real exchange canary still deploy-time"
+  ],
+  "local_tests": {
+    "p0c": 37,
+    "p0a_p0b_p0c": 67,
+    "full_regression": "984 passed, 1 skipped"
+  }
+}
