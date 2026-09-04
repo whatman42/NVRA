@@ -1,25 +1,34 @@
-# Stage 3.1 — State, Checkpoint & Crash Recovery
+# Stage 3.2 — Final State, Checkpoint & Crash Recovery
 
-## Production path
+## Qualified production path
 
-`god.institutional.checkpoint.CheckpointStore` validates lifecycle claims on **save** and **load**.
+`god.institutional.checkpoint.CheckpointStore`:
 
-- `trusted_ready` requires valid recon + lifecycle READY/RUNNING
-- `trusted_execution` is **always False** from checkpoint alone
-- RiskEngine remains mandatory for any execution authorization
-- LIVE remains blocked by default
+- save/load semantic validation
+- `trusted_ready` only with valid recon + lifecycle
+- `trusted_execution` **never** granted by checkpoint alone
+- RiskEngine remains mandatory for execution authorization
 
-## Labels
+## Windows product recovery (exact HEAD)
 
-| Evidence | Label |
-|----------|-------|
-| Institutional checkpoint matrix | PRODUCTION_PATH |
-| Recovery → RiskEngine chain | PRODUCTION_PATH |
-| Windows NVRA.exe process recovery | PRODUCTION_PATH (Stage 2.5) |
-| systemd | UNOBSERVABLE |
-| Research harness wrappers | RESEARCH_HARNESS |
+HEAD `cb34ac5eb1a8623f65184e68bf7182c7561648b8`  
+Run [33850370520](https://github.com/whatman42/nvra/actions/runs/33850370520):
 
-## Crash boundaries
+- Build NVRA.exe PASS
+- CLI smoke PASS
+- `--headless` composition PASS
+- process kill/restart recovery PASS
+- Artifact NVRA-Windows `9928684607`
 
-Windows actual EXE: headless kill/restart PASS (Stage 2.5).
-Per-lifecycle GUI composition boundaries remain partially UNOBSERVABLE without interactive desktop.
+## Non-blocking deferrals
+
+| Gap | Stage |
+|-----|-------|
+| GUI interactive E2E | 9 |
+| systemd service E2E | 9 |
+| Broker exactly-once | 7/9 |
+| MTTR SLA | 9 |
+
+## Production semantics
+
+Unchanged vs Stage 2 baseline for Risk/LIVE/SAFE_MODE/Execution authority.

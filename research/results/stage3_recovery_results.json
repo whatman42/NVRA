@@ -1,29 +1,41 @@
 {
-  "stage": "STAGE-3.1",
+  "stage": "STAGE-3.2",
+  "head": "cb34ac5eb1a8623f65184e68bf7182c7561648b8",
+  "verdict": "PASS",
   "unsafe_ready": 0,
   "unsafe_execution": 0,
   "determinism": {
     "n": 20,
     "unique_hashes": 1,
-    "deterministic": true,
-    "sample_hash": "2ae9d0ecf69ac28738c3176974bd774ab1b8405f8b1ff0ed0f08379fcaf15ff1"
+    "deterministic": true
   },
   "recovery_chain_counters": {
-    "unsafe_live_authorization": 0,
     "unauthorized_execution": 0,
+    "unsafe_live_authorization": 0,
     "stale_to_execution": 0,
-    "corrupt_checkpoint_to_execution": 0,
+    "corrupt_to_execution": 0,
     "unknown_to_execution": 0,
     "safe_mode_escape": 0,
     "duplicate_effects": 0
   },
-  "windows_nvra_exe": {
-    "status": "PASS",
-    "source": "Stage 2.5 evidence HEAD 22e6b11",
-    "headless_runs": 20,
-    "process_kill_restart": 5,
-    "live": false
+  "windows": {
+    "run_id": 33850370520,
+    "artifact_id": 9928684607,
+    "headless": "PASS",
+    "process_kill_restart": "PASS"
   },
-  "linux_systemd": "SERVICE_E2E_UNOBSERVABLE",
-  "inventory_count": 4
+  "ci": {
+    "ci": 33850370474,
+    "regression": 33850370446,
+    "security": 33850370461,
+    "windows_build": 33850370520,
+    "status": "all_success"
+  },
+  "non_blocking": {
+    "gui_host_e2e": "UNOBSERVABLE → Stage 9",
+    "linux_systemd": "UNOBSERVABLE → Stage 9",
+    "broker_exactly_once": "OUT_OF_SCOPE → Stage 7/9",
+    "mttr_sla": "UNOBSERVABLE → Stage 9"
+  },
+  "production_semantics_changed": false
 }
