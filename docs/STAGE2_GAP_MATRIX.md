@@ -1,19 +1,30 @@
-# Stage 2.2 Gap Matrix
+# Stage 2.3 Gap Matrix
 
-| Surface | Runs | Equal | Divergence | Status |
-|---------|------|-------|------------|--------|
-| EventBus | 100 | yes | yes | PASS |
-| Worker | 100 | yes | — | PASS |
-| Multi-handler (7 handlers, engines=None) | 100 | yes | order-dependent | PASS_FIXTURE |
-| RiskEngine | 100 | yes | yes | PASS |
-| ExecutionStore | 100 | yes | — | PASS (2.1) |
-| Recovery B1–B6 | — | yes | — | PASS (2.1) |
-| Analysis | 20+ | yes | yes | PASS_synthetic_internal |
-| Research | 20+ | yes | — | PASS_internal_from_analysis |
-| Decision | 20+ | yes | — | PASS_paper |
-| run_startup composition | 20 | yes | — | PASS_PAPER |
-| NVRA.exe full GUI composition | — | — | — | UNOBSERVABLE |
+## Handler inventory
 
-**Replay scope:** INTEGRATED_PARTIAL  
-**Coverage methodology:** product surfaces exercised with DI engines=None + synthetic internal analysis; NVRA.exe GUI composition not replayed beyond CLI/run_startup.  
-**Verdict:** GO-MORE-DATA
+| Handler | Engine | Status | Reachable |
+|---------|--------|--------|-----------|
+| CuriosityHandler | CuriosityEngine | REAL | yes |
+| ResearchHandler | ResearchEngine + ExperimentEngine | REAL | yes |
+| StrategyHandler | StrategyRegistry | REAL | yes |
+| DriftRegimeHandler | DriftEngine + RegimeEngine | REAL | yes |
+| PolicyCapitalHandler | PolicyEngine + CapitalSafetyEngine | REAL | yes |
+| RealityRCAHandler | RealityGapEngine + RCAEngine | REAL | yes |
+| ShadowHandler | RealityGapEngine | REAL | yes |
+| CognitiveLoopHandler | CognitiveLoopEngine | OPTIONAL | not required for S2 path |
+
+## Surfaces
+
+| Surface | Status | Notes |
+|---------|--------|-------|
+| Multi-handler real engines | PASS | 100/100 deterministic |
+| Worker/dispatcher | PASS | |
+| RiskEngine | PASS | REAL_PRODUCTION |
+| ExecutionStore | PASS | Stage 2.1 |
+| Recovery B1–B6 | PASS | Stage 2.1 |
+| run_startup PAPER | PASS | REAL_PRODUCTION |
+| NVRA.exe GUI composition | UNOBSERVABLE | CLI smoke ≠ full GUI composition |
+| Process-level EXE restart | UNOBSERVABLE | Linux host |
+| External LLM research | N/A | not used; no fixture claim as real |
+
+**Verdict:** GO-MORE-DATA (NVRA.exe full GUI composition remains material gap)

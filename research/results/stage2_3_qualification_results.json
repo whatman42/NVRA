@@ -6,6 +6,7 @@
     "deterministic_matches": 100,
     "engine_mode": "REAL_PRODUCTION",
     "handlers_real": 7,
+    "handlers_optional_unavailable": 1,
     "nvra_exe_gui_composition": "UNOBSERVABLE",
     "run_startup_paper": "PASS",
     "pipeline_coverage_pct": 90.0,
