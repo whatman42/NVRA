@@ -1,0 +1,21 @@
+{
+  "stage": "STAGE-8",
+  "verdict": "GO-MORE-DATA",
+  "statuses": {
+    "experiment_specification": "PASS",
+    "artifact_identity": "PASS",
+    "model_registry": "PASS",
+    "dataset_versioning": "PASS",
+    "promotion_gate": "PASS",
+    "worker_architecture": "PASS",
+    "resource_governance": "PASS",
+    "determinism": "PASS",
+    "inv003_ml_boundary": "PASS"
+  },
+  "integrity_bypass": 0,
+  "duplicate_effects": 0,
+  "colab": "UNOBSERVABLE",
+  "kaggle": "UNOBSERVABLE",
+  "real_capital": "BLOCKED — Stage 10 ONLY",
+  "production_semantics_changed": false
+}
