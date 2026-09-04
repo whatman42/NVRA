@@ -63,6 +63,29 @@ jobs:
           $len = (Get-Item dist/NVRA.exe).Length
           if ($len -lt 1000000) { throw "NVRA.exe unexpectedly small: $len" }
           Write-Host "NVRA.exe size=$len"
+
+      - name: CLI smoke (NVRA.exe)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing before smoke" }
+          function Invoke-NvraCli([string]$CliArg) {
+            $p = Start-Process `
+              -FilePath ".\dist\NVRA.exe" `
+              -ArgumentList $CliArg `
+              -Wait `
+              -PassThru `
+              -WindowStyle Hidden
+            Write-Host "NVRA $CliArg ExitCode=$($p.ExitCode)"
+            if ($null -eq $p.ExitCode) {
+              throw "NVRA $CliArg returned null ExitCode"
+            }
+            if ($p.ExitCode -ne 0) {
+              throw "NVRA $CliArg failed ExitCode=$($p.ExitCode)"
+            }
+          }
+          Invoke-NvraCli "--version"
+          Invoke-NvraCli "--health"
+
       - name: SHA-256
         shell: pwsh
         run: |
