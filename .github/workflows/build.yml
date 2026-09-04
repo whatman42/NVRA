@@ -34,7 +34,7 @@ jobs:
       - run: python -m pytest -q
 
   windows-build:
-    name: Windows PyInstaller (NVRAFX)
+    name: Windows PyInstaller (NVRA)
     needs: tests
     runs-on: windows-latest
     timeout-minutes: 45
@@ -53,24 +53,24 @@ jobs:
             pip install -r requirements.txt
           }
       - run: python -m pip check
-      - name: Build NVRAFX.exe
+      - name: Build NVRA.exe
         shell: pwsh
         run: |
           python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean
-          if (-not (Test-Path dist/NVRAFX.exe)) { throw "NVRAFX.exe missing" }
+          if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing" }
           if (Test-Path dist/NUNG.exe) { throw "NUNG.exe must not be produced" }
-          if (Test-Path dist/NVRA.exe) { throw "NVRA.exe must not be produced" }
-          $len = (Get-Item dist/NVRAFX.exe).Length
-          if ($len -lt 1000000) { throw "NVRAFX.exe unexpectedly small: $len" }
-          Write-Host "NVRAFX.exe size=$len"
+          if (Test-Path dist/NVRAFX.exe) { throw "NVRAFX.exe must not be produced as product binary" }
+          $len = (Get-Item dist/NVRA.exe).Length
+          if ($len -lt 1000000) { throw "NVRA.exe unexpectedly small: $len" }
+          Write-Host "NVRA.exe size=$len"
       - name: SHA-256
         shell: pwsh
         run: |
-          Get-FileHash dist/NVRAFX.exe -Algorithm SHA256 | Format-List
-          Get-FileHash dist/NVRAFX.exe -Algorithm SHA256 | ConvertTo-Json | Out-File dist/NVRAFX.exe.sha256.json
+          Get-FileHash dist/NVRA.exe -Algorithm SHA256 | Format-List
+          Get-FileHash dist/NVRA.exe -Algorithm SHA256 | ConvertTo-Json | Out-File dist/NVRA.exe.sha256.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: NVRAFX-Windows
+          name: NVRA-Windows
           path: |
-            dist/NVRAFX.exe
-            dist/NVRAFX.exe.sha256.json
+            dist/NVRA.exe
+            dist/NVRA.exe.sha256.json

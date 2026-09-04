@@ -1,4 +1,4 @@
-# NVRAFX Windows Build
+# NVRA Windows Build
 
 On a Windows x64 machine or GitHub Actions:
 
@@ -9,14 +9,14 @@ On a Windows x64 machine or GitHub Actions:
 5. Run the GUI import smoke test.
 6. Build with:
    `python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean`
-7. Verify `dist/NVRAFX.exe` exists.
-8. Verify `NUNG.exe` and `NVRA.exe` do not exist.
+7. Verify `dist/NVRA.exe` exists.
+8. Verify `NUNG.exe` and `NVRAFX.exe` do not exist as product binaries.
 9. Run:
-   `dist\NVRAFX.exe --version`
-   `dist\NVRAFX.exe --health`
-   `dist\NVRAFX.exe --check-config`
+   `dist\NVRA.exe --version`
+   `dist\NVRA.exe --health`
+   `dist\NVRA.exe --check-config`
 10. Launch the GUI with:
-   `dist\NVRAFX.exe --gui`
+   `dist\NVRA.exe --gui`
 
 The repository's Windows GitHub Actions workflows automate these checks.
 
