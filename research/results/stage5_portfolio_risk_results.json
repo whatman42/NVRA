@@ -1,7 +1,7 @@
 {
-  "stage": "STAGE-5.2",
+  "stage": "STAGE-5.3",
   "head": "c9206a76a1568dd71a5cd002624572df1bc0a0d8",
-  "verdict": "GO-MORE-DATA",
+  "verdict": "PASS",
   "statuses": {
     "portfolio_state": "PASS",
     "exposure": "PASS",
@@ -14,11 +14,13 @@
     "agent_ml_boundary": "PASS",
     "cvar_stress": "PASS"
   },
+  "determinism": {"n": 20, "unique": 1, "mutation_divergence": true},
   "ci": {
     "ci": 33861377443,
     "regression": 33861377365,
     "security": 33861377484,
-    "windows": 33861377298
+    "windows": 33861377298,
+    "status": "all_success"
   },
   "deferred": {
     "cvar_es": "DEFERRED non-blocking",

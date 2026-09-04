@@ -1,6 +1,6 @@
-# Stage 5.2 Final Gap Matrix — Institutional Portfolio & Risk
+# Stage 5.3 Final Gap Matrix — Institutional Portfolio & Risk
 
-## Material gates
+## Material gates — ALL PASS
 
 | Gate | Status |
 |------|--------|
@@ -9,21 +9,20 @@
 | Sizing authority (advisory → RiskEngine) | **PASS** |
 | Drawdown control | **PASS** |
 | Capital/leverage fail-closed | **PASS** |
-| Determinism N≥20 | **PASS** |
+| Determinism N≥20 (unique=1) | **PASS** |
 | Dual-stack boundary (not dual authority) | **PASS** |
 | ML cannot raise ceiling (INV-003) | **PASS** |
 | Invariants preserved | **PASS** |
 | Production semantic regression | **NO** |
-| CI / Regression / Security on `c9206a76` | **PASS** |
-| Windows on `c9206a76` | see final report |
+| CI / Regression / Security / Windows on `c9206a76` | **PASS** |
 
 ## Materiality decisions (non-blocking)
 
 | Gap | Decision |
 |-----|----------|
-| Production CVaR/ES | **DEFERRED** — not required for Stage 5 minimum; research only |
-| Full portfolio vol/correlation engine | **DEFERRED** — RiskEngine authority sufficient without it |
-| Full multi-currency FX aggregation | **GAP / DEFERRED** — multi-exchange keys exist; no full FX book |
+| Production CVaR/ES | **DEFERRED** |
+| Full portfolio vol/correlation engine | **DEFERRED** |
+| Full multi-currency FX aggregation | **GAP / DEFERRED** |
 | Full concentration matrix | **POLICY_LIMITS** scope only |
 
 ## Authority matrix (unchanged)
@@ -37,3 +36,7 @@ ProductionGate / SAFE_MODE / reconciliation
         ↓
 ExecutionEngine
 ```
+
+**Stage 5 VERDICT: FULLY PASSED**
+
+Evidence HEAD: `c9206a76a1568dd71a5cd002624572df1bc0a0d8`
