@@ -56,7 +56,7 @@ jobs:
       - name: Build NVRA.exe
         shell: pwsh
         run: |
-          python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean
+          python -m PyInstaller packaging/nvra_onefile.spec --noconfirm --clean
           if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing" }
           if (Test-Path dist/NUNG.exe) { throw "NUNG.exe must not be produced" }
           if (Test-Path dist/NVRAFX.exe) { throw "NVRAFX.exe must not be produced as product binary" }
@@ -70,7 +70,7 @@ jobs:
           if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing before smoke" }
           function Invoke-NvraCli([string]$CliArg) {
             $p = Start-Process `
-              -FilePath ".\dist\NVRA.exe" `
+              -FilePath ".\\dist\\NVRA.exe" `
               -ArgumentList $CliArg `
               -Wait `
               -PassThru `
@@ -85,6 +85,34 @@ jobs:
           }
           Invoke-NvraCli "--version"
           Invoke-NvraCli "--health"
+
+      - name: Actual NVRA.exe headless composition (PAPER)
+        shell: pwsh
+        run: |
+          $results = @()
+          for ($i = 0; $i -lt 20; $i++) {
+            $p = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" -Wait -PassThru -WindowStyle Hidden
+            Write-Host "NVRA --headless run=$i ExitCode=$($p.ExitCode)"
+            if ($null -eq $p.ExitCode -or $p.ExitCode -ne 0) { throw "NVRA --headless failed run=$i exit=$($p.ExitCode)" }
+            $results += $p.ExitCode
+          }
+          if (($results | Select-Object -Unique).Count -ne 1) { throw "non-deterministic headless exits" }
+          Write-Host "HEADLESS_COMPOSITION_PASS runs=20 exit=0 live=false"
+
+      - name: Actual NVRA.exe process kill/restart recovery
+        shell: pwsh
+        run: |
+          for ($i = 0; $i -lt 5; $i++) {
+            $p = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" -PassThru -WindowStyle Hidden
+            Start-Sleep -Milliseconds 200
+            if (-not $p.HasExited) {
+              Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+              try { $p.WaitForExit(5000) } catch {}
+            }
+            $p2 = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--headless" -Wait -PassThru -WindowStyle Hidden
+            if ($null -eq $p2.ExitCode -or $p2.ExitCode -ne 0) { throw "restart failed run=$i exit=$($p2.ExitCode)" }
+          }
+          Write-Host "PROCESS_RECOVERY_PASS runs=5 live=false"
 
       - name: SHA-256
         shell: pwsh
