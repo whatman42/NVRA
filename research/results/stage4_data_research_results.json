@@ -1,6 +1,7 @@
 {
-  "stage": "STAGE-4.1",
-  "verdict": "GO-MORE-DATA",
+  "stage": "STAGE-4.2",
+  "head": "3d513212d5039491c9fe79948fd7eaf9e17c8a4c",
+  "verdict": "PASS",
   "statuses": {
     "dataset_content_hash": "PASS",
     "dataset_immutability_leakage": "PASS",
@@ -10,8 +11,20 @@
     "research_execution_boundary": "PASS",
     "data_ingest_validation_surface": "PASS"
   },
+  "lineage": {
+    "A_module": "PASS",
+    "B_internal": "PASS_INTERNAL",
+    "C_external": "UNOBSERVABLE"
+  },
+  "ci": {
+    "ci": 33858422492,
+    "regression": 33858422531,
+    "security": 33858422460,
+    "windows": 33858422444,
+    "status": "all_success"
+  },
   "external_providers": "UNOBSERVABLE",
-  "l2_microstructure": "GAP → Stage 7 if needed",
-  "scientific_validity": "EXISTING_CAPABILITY — not full statistical certification",
+  "l2_microstructure": "GAP → Stage 7",
+  "scientific_validity": "EXISTING_CAPABILITY ≠ FULL_STATISTICAL_CERTIFICATION",
   "production_semantics_changed": false
 }

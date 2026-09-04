@@ -1,17 +1,34 @@
-# Stage 4.1 Gap Matrix — Unified Data & Research
+# Stage 4.2 Final Gap Matrix — Unified Data & Research
 
-| Area | Status | Label |
-|------|--------|-------|
-| Content hash determinism/divergence | PASS | PRODUCTION_PATH |
-| DatasetSnapshot checksum immutability | PASS | PRODUCTION_PATH |
-| Leakage/embargo detection | PASS | PRODUCTION_PATH |
-| Data quality gates (NaN fail-closed) | PASS | PRODUCTION_PATH |
-| Artifact validation / promotion gate | PASS | PRODUCTION_PATH |
-| Experiment metadata reproducibility N=20 | PASS | RESEARCH_PATH |
-| Research → execution boundary | PASS | PRODUCTION_PATH |
-| External market data providers | UNOBSERVABLE | no credentials in CI |
-| L2 / microstructure full stack | GAP | defer Stage 7 if needed |
-| Full CPCV/PBO/FDR statistical certification | EXISTING modules, not full cert | scientific Stage later |
-| Exact HEAD CI GREEN | pending | |
+## Material gates
 
-**Verdict:** GO-MORE-DATA until exact HEAD CI/Windows GREEN; external data/L2 remain non-blocking if classified.
+| Gate | Status |
+|------|--------|
+| Deterministic dataset identity (`content_hash` / `DatasetSnapshot.checksum`) | **PASS** |
+| Data quality fail-closed (NaN → restrict train/promote) | **PASS** |
+| Temporal integrity / leakage detection | **PASS** |
+| Dataset mutation → identity divergence | **PASS** |
+| Experiment reproducibility N≥20 | **PASS** |
+| Artifact provenance / promotion reject on corrupt/mismatch | **PASS** |
+| Research cannot authorize LIVE | **PASS** |
+| Exact HEAD CI / Regression / Security / Windows | **PASS** (`3d513212`) |
+| Production safety semantic regression | **NO** |
+
+## Lineage levels
+
+| Level | Status |
+|-------|--------|
+| A Module capability | **PASS** |
+| B Internal E2E lineage tested | **PASS_INTERNAL** |
+| C External market feed → model | **UNOBSERVABLE** (non-material for Stage 4) |
+
+## Deferred (non-blocking)
+
+| Gap | Stage |
+|-----|-------|
+| External provider E2E | when credentials available / ops |
+| L2 / microstructure | Stage 7 |
+| Full CPCV/PBO/FDR certification | later scientific stage |
+| Full product DATA→ANALYSIS→RESEARCH external replay | remains Stage-2 integrated-partial boundary |
+
+**Stage 4 VERDICT: FULLY PASSED**
