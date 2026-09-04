@@ -97,6 +97,23 @@ def _scenario(tmp_path: Path, stop_after: str, corrupt: str | None = None) -> di
     t_start = time.time()
     proc = _spawn_run(workdir, stop_after, corrupt)
     status = _wait_status(workdir, expect_stage=stop_after)
+    if corrupt in ("partial_write", "semantic_invalid", "before_save"):
+        want = {
+            "partial_write": "partial_write_injected",
+            "semantic_invalid": "semantic_invalid_rejected",
+            "before_save": "before_save",
+        }[corrupt]
+        deadline = time.time() + 5
+        while time.time() < deadline:
+            try:
+                st = json.loads((workdir / "status.json").read_text())
+                ph = st.get("phase")
+                if ph == want or (corrupt == "semantic_invalid" and ph == "semantic_invalid_saved"):
+                    status = st
+                    break
+            except (json.JSONDecodeError, OSError):
+                pass
+            time.sleep(0.02)
     kill_s = _kill_hard(proc)
     t_after_kill = time.time()
     assert proc.poll() is not None
@@ -114,15 +131,7 @@ def _scenario(tmp_path: Path, stop_after: str, corrupt: str | None = None) -> di
 
 @pytest.mark.parametrize(
     "stop_after",
-    [
-        "INIT",
-        "LOAD_STATE",
-        "BROKER_CONNECT",
-        "RECONCILIATION",
-        "RISK_GOVERNOR",
-        "READY",
-        "RUNNING",
-    ],
+    ["INIT", "LOAD_STATE", "BROKER_CONNECT", "RECONCILIATION", "RISK_GOVERNOR", "READY", "RUNNING"],
 )
 def test_sigkill_at_stage_no_unsafe_execution(tmp_path: Path, stop_after: str):
     rec = _scenario(tmp_path, stop_after)
@@ -142,7 +151,9 @@ def test_sigkill_before_save(tmp_path: Path):
 
 def test_sigkill_after_partial_write(tmp_path: Path):
     rec = _scenario(tmp_path, "RUNNING", corrupt="partial_write")
-    assert rec["loaded"] is False or rec["trusted_ready"] is False
+    assert rec["scenario"]["status"].get("phase") == "partial_write_injected"
+    assert rec["loaded"] is False
+    assert rec["trusted_ready"] is False
     assert rec["execution_allowed"] is False
     assert rec["unsafe_execution"] is False
 
