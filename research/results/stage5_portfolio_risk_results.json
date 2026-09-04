@@ -1,0 +1,19 @@
+{
+  "stage": "STAGE-5.1",
+  "verdict": "GO-MORE-DATA",
+  "statuses": {
+    "portfolio_state": "PASS",
+    "exposure": "PASS",
+    "risk_engine_authority": "PASS",
+    "drawdown": "PASS",
+    "position_sizing": "PASS",
+    "fail_closed": "PASS",
+    "determinism": "PASS",
+    "dual_stack_concordance": "PASS",
+    "agent_ml_boundary": "PASS",
+    "cvar_stress": "PASS"
+  },
+  "cross_asset": "PARTIAL",
+  "concentration": "POLICY_LIMITS",
+  "production_semantics_changed": false
+}
