@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "stage": "STAGE-2.4",
+    "verdict": "GO-MORE-DATA",
+    "note": "pending final Windows CI GREEN for ACTUAL NVRA.exe headless/recovery",
+    "actual_nvra_exe_cli": "PASS_PRIOR",
+    "actual_nvra_exe_headless": "CI_ADDED",
+    "actual_nvra_exe_process_recovery": "CI_ADDED",
+    "gui_host_e2e": "UNOBSERVABLE",
+    "source_run_startup": "PASS",
+    "production_changed": false
+  }
+}

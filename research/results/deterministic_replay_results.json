@@ -1,15 +1,9 @@
 {
   "summary": {
-    "stage": "STAGE-2.3",
+    "stage": "STAGE-2.4",
     "verdict": "GO-MORE-DATA",
-    "replay_runs": 100,
-    "deterministic_matches": 100,
-    "engine_mode": "REAL_PRODUCTION",
-    "handlers_real": 7,
-    "nvra_exe_gui_composition": "UNOBSERVABLE",
-    "run_startup_paper": "PASS",
-    "pipeline_coverage_pct": 90.0,
-    "replay_scope": "INTEGRATED_PARTIAL",
+    "gui_host_e2e": "UNOBSERVABLE",
+    "actual_nvra_exe_headless": "CI_ADDED",
     "production_changed": false
   }
 }

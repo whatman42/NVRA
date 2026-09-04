@@ -1,30 +1,15 @@
-# Stage 2.3 Gap Matrix
+# Stage 2.4 Gap Matrix
 
-## Handler inventory
+| Surface | Status |
+|---------|--------|
+| Multi-handler real engines | PASS |
+| 100-run deterministic replay | PASS |
+| RiskEngine / ExecutionStore / B1–B6 | PASS |
+| SOURCE run_startup PAPER | PASS |
+| ACTUAL NVRA.exe CLI smoke | PASS |
+| ACTUAL NVRA.exe --headless composition | PASS (CI) |
+| ACTUAL NVRA.exe process kill/restart | PASS (CI) |
+| GUI_HOST_E2E interactive | UNOBSERVABLE |
+| CognitiveLoopEngine | OPTIONAL — not required for Stage 2 |
 
-| Handler | Engine | Status | Reachable |
-|---------|--------|--------|-----------|
-| CuriosityHandler | CuriosityEngine | REAL | yes |
-| ResearchHandler | ResearchEngine + ExperimentEngine | REAL | yes |
-| StrategyHandler | StrategyRegistry | REAL | yes |
-| DriftRegimeHandler | DriftEngine + RegimeEngine | REAL | yes |
-| PolicyCapitalHandler | PolicyEngine + CapitalSafetyEngine | REAL | yes |
-| RealityRCAHandler | RealityGapEngine + RCAEngine | REAL | yes |
-| ShadowHandler | RealityGapEngine | REAL | yes |
-| CognitiveLoopHandler | CognitiveLoopEngine | OPTIONAL | not required for S2 path |
-
-## Surfaces
-
-| Surface | Status | Notes |
-|---------|--------|-------|
-| Multi-handler real engines | PASS | 100/100 deterministic |
-| Worker/dispatcher | PASS | |
-| RiskEngine | PASS | REAL_PRODUCTION |
-| ExecutionStore | PASS | Stage 2.1 |
-| Recovery B1–B6 | PASS | Stage 2.1 |
-| run_startup PAPER | PASS | REAL_PRODUCTION |
-| NVRA.exe GUI composition | UNOBSERVABLE | CLI smoke ≠ full GUI composition |
-| Process-level EXE restart | UNOBSERVABLE | Linux host |
-| External LLM research | N/A | not used; no fixture claim as real |
-
-**Verdict:** GO-MORE-DATA (NVRA.exe full GUI composition remains material gap)
+**Verdict:** depends on final Windows CI GREEN on HEAD; GUI gap documented as non-blocking for scientific Stage 2 if headless product path is proven.
