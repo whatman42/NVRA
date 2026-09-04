@@ -14,10 +14,12 @@ from research.harness.stage6_oms_execution_qualification import (
     qualify_paper_submit_and_idempotency,
     qualify_risk_gate,
     qualify_determinism,
+    run_stage6,
+)
+from research.harness.stage6_execution_closure import (
     qualify_cancel,
     qualify_unknown_reconcile,
     qualify_recovery_boundaries,
-    run_stage6,
 )
 
 
@@ -41,7 +43,7 @@ def test_determinism_20():
     assert r.details["unique"] == 1
 
 
-def test_run_stage6_all_pass():
+def test_run_stage6_core_pass():
     out = run_stage6()
     for k, v in out["statuses"].items():
         assert v == "PASS", (k, v)
