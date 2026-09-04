@@ -1,0 +1,16 @@
+{
+  "process_kill": "SIGKILL",
+  "evidence": "E4_os_subprocess",
+  "unsafe_ready_total": 0,
+  "unsafe_execution_total": 0,
+  "duplicate_effects": 0,
+  "local_tests": {
+    "process_kill_suite": 15,
+    "with_p0a_gate": 30,
+    "full_regression": "947 passed, 1 skipped"
+  },
+  "production_files_changed": [],
+  "mttr_scope": "local_subprocess_SIGKILL",
+  "production_service_mttr": "NOT_OBSERVABLE",
+  "verdict_local": "ACCEPTANCE_LOCAL_MET"
+}
