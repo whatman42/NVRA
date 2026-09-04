@@ -1,16 +1,16 @@
 {
   "summary": {
-    "stage": "STAGE-2.1",
+    "stage": "STAGE-2.2",
     "verdict": "GO-MORE-DATA",
     "replay_runs": 100,
     "deterministic_matches": 100,
-    "mismatch_count": 0,
-    "duplicate_effects": 0,
-    "eventbus_worker_handler": "PARTIAL_PASS",
-    "recovery_boundary_matrix": "PASS_B1_B6",
-    "riskengine_roundtrip": "PASS",
-    "executionstore_roundtrip": "PASS",
-    "pipeline_coverage_pct": 78.0,
+    "multi_handler": "PASS_FIXTURE_ENGINES_NONE",
+    "startup_composition": "PASS_run_startup_PAPER",
+    "nvra_exe_full_gui_composition": "UNOBSERVABLE",
+    "analysis": "PASS_synthetic_internal",
+    "research": "PASS_internal_from_analysis",
+    "decision": "PASS_paper",
+    "pipeline_coverage_pct": 86.0,
     "replay_scope": "INTEGRATED_PARTIAL",
     "production_changed": false
   }

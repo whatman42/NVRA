@@ -1,17 +1,19 @@
-# Stage 2 / 2.1 Gap Matrix
+# Stage 2.2 Gap Matrix
 
-| Surface | Coverage | Status |
-|---------|----------|--------|
-| synthetic replay | PASS | none |
-| EventBus publish/consume | PASS | none |
-| Worker/handler path | CuriosityHandler pass-through | PARTIAL (other handlers optional engines) |
-| Recovery-boundary matrix B1–B6 | orchestration CheckpointStore | PASS (supported boundaries) |
-| RiskEngine.evaluate | production API | PASS |
-| ExecutionStore round-trip | semantic + idempotent save | PASS |
-| Analysis/research pipeline | synthetic analysis + curiosity handler | PARTIAL |
-| NVRA.exe startup composition | CLI --version/--health only | PARTIAL / CI-qualified |
-| Full product EventBus all handlers | engines optional | gap |
-| External LLM providers | fixture-only if used | N/A in harness |
+| Surface | Runs | Equal | Divergence | Status |
+|---------|------|-------|------------|--------|
+| EventBus | 100 | yes | yes | PASS |
+| Worker | 100 | yes | — | PASS |
+| Multi-handler (7 handlers, engines=None) | 100 | yes | order-dependent | PASS_FIXTURE |
+| RiskEngine | 100 | yes | yes | PASS |
+| ExecutionStore | 100 | yes | — | PASS (2.1) |
+| Recovery B1–B6 | — | yes | — | PASS (2.1) |
+| Analysis | 20+ | yes | yes | PASS_synthetic_internal |
+| Research | 20+ | yes | — | PASS_internal_from_analysis |
+| Decision | 20+ | yes | — | PASS_paper |
+| run_startup composition | 20 | yes | — | PASS_PAPER |
+| NVRA.exe full GUI composition | — | — | — | UNOBSERVABLE |
 
-**Replay scope:** INTEGRATED_PARTIAL (expanded)  
-**Verdict:** GO-MORE-DATA (NVRA.exe full composition + multi-handler engines remain open)
+**Replay scope:** INTEGRATED_PARTIAL  
+**Coverage methodology:** product surfaces exercised with DI engines=None + synthetic internal analysis; NVRA.exe GUI composition not replayed beyond CLI/run_startup.  
+**Verdict:** GO-MORE-DATA
