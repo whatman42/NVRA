@@ -1,4 +1,4 @@
-name: NVRAFX Windows Release
+name: NVRA Windows Release
 
 on:
   workflow_dispatch:
@@ -27,30 +27,30 @@ jobs:
       - name: pip check
         shell: pwsh
         run: python -m pip check
-      - name: Build NVRAFX.exe
+      - name: Build NVRA.exe
         shell: pwsh
         run: |
           python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean
-          if (-not (Test-Path dist/NVRAFX.exe)) { throw "NVRAFX.exe missing" }
+          if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing" }
           if (Test-Path dist/NUNG.exe) { throw "NUNG.exe must not be produced" }
-          if (Test-Path dist/NVRA.exe) { throw "NVRA.exe must not be produced" }
+          if (Test-Path dist/NVRAFX.exe) { throw "NVRAFX.exe must not be produced as product binary" }
       - name: Smoke test
         shell: pwsh
         run: |
-          function Invoke-NvrafxCli([string]$CliArg) {
+          function Invoke-NvraCli([string]$CliArg) {
             $p = Start-Process `
-              -FilePath ".\dist\NVRAFX.exe" `
+              -FilePath ".\dist\NVRA.exe" `
               -ArgumentList $CliArg `
               -Wait `
               -PassThru `
               -WindowStyle Hidden
-            Write-Host "NVRAFX $CliArg ExitCode=$($p.ExitCode)"
+            Write-Host "NVRA $CliArg ExitCode=$($p.ExitCode)"
             if ($null -eq $p.ExitCode) {
-              throw "NVRAFX $CliArg returned null ExitCode (process did not report status)"
+              throw "NVRA $CliArg returned null ExitCode (process did not report status)"
             }
             if ($p.ExitCode -ne 0) {
-              throw "NVRAFX $CliArg failed with exit code $($p.ExitCode)"
+              throw "NVRA $CliArg failed with exit code $($p.ExitCode)"
             }
           }
-          Invoke-NvrafxCli "--version"
-          Invoke-NvrafxCli "--health"
+          Invoke-NvraCli "--version"
+          Invoke-NvraCli "--health"

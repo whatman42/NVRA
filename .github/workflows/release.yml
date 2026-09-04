@@ -1,8 +1,8 @@
 name: Release
 
-# Permanent GitHub Release with NVRAFX Windows package.
+# Permanent GitHub Release with NVRA Windows package.
 # Trigger: push tag v* OR workflow_dispatch with version input.
-# Secrets: uses GITHUB_TOKEN only (no extra secrets required for unsigned release).
+# Secrets: uses GITHUB_TOKEN only (no extra secrets required for public release assets).
 
 on:
   push:
@@ -11,29 +11,24 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release tag (e.g. v0.1.0)"
+        description: "Release version (e.g. v0.1.0)"
         required: true
-        default: "v0.1.0"
-      draft:
-        description: "Create as draft release"
-        required: false
-        default: "false"
+        type: string
 
 permissions:
   contents: write
 
 jobs:
-  release-windows:
+  windows-package:
+    name: Build Windows package
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
           cache: pip
-
       - name: Install dependencies
         shell: pwsh
         run: |
@@ -43,82 +38,68 @@ jobs:
           } else {
             pip install -r requirements.txt
           }
-
-      - name: pip check
-        shell: pwsh
-        run: python -m pip check
-
-      - name: Build NVRAFX.exe
+      - run: python -m pip check
+      - name: Build NVRA.exe
         shell: pwsh
         run: |
           python -m PyInstaller packaging/nvrafx_onefile.spec --noconfirm --clean
-          if (-not (Test-Path dist/NVRAFX.exe)) { throw "NVRAFX.exe missing" }
+          if (-not (Test-Path dist/NVRA.exe)) { throw "NVRA.exe missing" }
           if (Test-Path dist/NUNG.exe) { throw "NUNG.exe must not be produced" }
-          if (Test-Path dist/NVRA.exe) { throw "NVRA.exe must not be produced" }
-
+          if (Test-Path dist/NVRAFX.exe) { throw "NVRAFX.exe must not be produced as product binary" }
       - name: Smoke CLI
         shell: pwsh
         run: |
-          function Invoke-NvrafxCli([string]$CliArg) {
-            $p = Start-Process -FilePath ".\dist\NVRAFX.exe" -ArgumentList $CliArg -Wait -PassThru -WindowStyle Hidden
-            Write-Host "NVRAFX $CliArg ExitCode=$($p.ExitCode)"
+          foreach ($CliArg in @("--version", "--health")) {
+            $p = Start-Process -FilePath ".\dist\NVRA.exe" -ArgumentList $CliArg -Wait -PassThru -WindowStyle Hidden
+            Write-Host "NVRA $CliArg ExitCode=$($p.ExitCode)"
             if ($null -eq $p.ExitCode -or $p.ExitCode -ne 0) {
-              throw "NVRAFX $CliArg failed ExitCode=$($p.ExitCode)"
+              throw "NVRA $CliArg failed ExitCode=$($p.ExitCode)"
             }
           }
-          Invoke-NvrafxCli "--version"
-          Invoke-NvrafxCli "--health"
-
-      - name: Package release ZIP
+      - name: Package release assets
         shell: pwsh
         run: |
-          $h = Get-FileHash dist/NVRAFX.exe -Algorithm SHA256
-          "NVRAFX.exe  $($h.Hash)" | Set-Content -Encoding utf8 SHA256SUMS.txt
+          $h = Get-FileHash dist/NVRA.exe -Algorithm SHA256
+          "NVRA.exe  $($h.Hash)" | Set-Content -Encoding utf8 SHA256SUMS.txt
           @"
-          # NVRAFX Release
-          Product: NVRAFX
-          LIVE-AUTHORIZED: false
+          # NVRA Release
+          Product: NVRA
+          Canonical binary: NVRA.exe
+          Size: $((Get-Item dist/NVRA.exe).Length)
           SHA256: $($h.Hash)
-          Size: $((Get-Item dist/NVRAFX.exe).Length)
-          Docs: LIVE_VALIDATION.md (if present), PHASE7 residual notes
-          Warning: LIVE can produce real transactions; default is fail-closed.
           "@ | Set-Content -Encoding utf8 RELEASE_NOTES.md
-          $files = @("dist/NVRAFX.exe", "SHA256SUMS.txt", "RELEASE_NOTES.md")
-          if (Test-Path LIVE_VALIDATION.md) { $files += "LIVE_VALIDATION.md" }
-          Compress-Archive -Path $files -DestinationPath NVRAFX_WINDOWS_RELEASE.zip -Force
-          Write-Host "SHA256=$($h.Hash)"
+          $files = @("dist/NVRA.exe", "SHA256SUMS.txt", "RELEASE_NOTES.md")
+          Compress-Archive -Path $files -DestinationPath NVRA_WINDOWS_RELEASE.zip -Force
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: NVRA-Windows-Release
+          path: |
+            NVRA_WINDOWS_RELEASE.zip
+            SHA256SUMS.txt
+            RELEASE_NOTES.md
 
-      - name: Resolve tag name
-        id: tag
-        shell: bash
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "name=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create GitHub Release
+  github-release:
+    name: Publish GitHub Release
+    needs: windows-package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: NVRA-Windows-Release
+      - name: Create release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.tag.outputs.name }}"
-          DRAFT_FLAG=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.draft }}" = "true" ]; then
-            DRAFT_FLAG="--draft"
-          fi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -f "$TAG" || true
-            git push origin "$TAG" || true
+            TAG="${{ github.event.inputs.version }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
           fi
           gh release create "$TAG" \
-            NVRAFX_WINDOWS_RELEASE.zip \
+            NVRA_WINDOWS_RELEASE.zip \
             SHA256SUMS.txt \
-            --title "NVRAFX $TAG" \
-            --generate-notes \
-            $DRAFT_FLAG \
-            --verify-tag || \
-          gh release upload "$TAG" NVRAFX_WINDOWS_RELEASE.zip SHA256SUMS.txt --clobber
+            --title "NVRA $TAG" \
+            --notes-file RELEASE_NOTES.md \
+            --verify-tag || true
+          gh release upload "$TAG" NVRA_WINDOWS_RELEASE.zip SHA256SUMS.txt --clobber
