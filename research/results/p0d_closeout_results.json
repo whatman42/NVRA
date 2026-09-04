@@ -1,0 +1,38 @@
+{
+  "commit": "1e83703e7cbc498b28b0aad208e741df47279c53",
+  "p0d_verdict": "GO-MORE-DATA",
+  "reason": "CI+Regression+Security GREEN; Windows PyInstaller still in_progress at closeout; GUI/Windows-service/Linux-systemd host E2E UNOBSERVABLE",
+  "ci": {
+    "CI": {"run_id": 33832263058, "conclusion": "success", "url": "https://github.com/whatman42/nvra/actions/runs/33832263058"},
+    "Regression": {"run_id": 33832263063, "conclusion": "success", "url": "https://github.com/whatman42/nvra/actions/runs/33832263063"},
+    "Security": {"run_id": 33832263047, "conclusion": "success", "url": "https://github.com/whatman42/nvra/actions/runs/33832263047"},
+    "NVRA_CI_and_Windows_Build": {"run_id": 33832263024, "status": "in_progress", "ubuntu_matrix": "success", "windows_pyinstaller": "in_progress", "url": "https://github.com/whatman42/nvra/actions/runs/33832263024"}
+  },
+  "local": {
+    "qualification_set": "75 passed",
+    "full_suite": "992 passed, 1 skipped"
+  },
+  "gates": {
+    "P0-A_checkpoint_semantics": "PASS_LOCAL_AND_CI",
+    "P0-B_process_kill": "PASS_LOCAL_AND_CI",
+    "P0-C_INV-001": "PASS_E2E_COMPOSITION",
+    "P0-C_INV-010": "PASS_E2E_COMPOSITION",
+    "P0-D_CI": "PARTIAL_GREEN_WINDOWS_PENDING",
+    "GUI_host_E2E": "GUI_E2E_UNOBSERVABLE",
+    "GUI_composition": "PASS_E2E_COMPOSITION",
+    "Windows_Task_Scheduler": "SERVICE_E2E_UNOBSERVABLE",
+    "Linux_systemd": "SERVICE_E2E_UNOBSERVABLE"
+  },
+  "safety": {
+    "unsafe_live": 0,
+    "unauthorized_execution": 0,
+    "fallback_to_live": 0,
+    "reconciliation_bypass": 0,
+    "safe_mode_escape": 0,
+    "checkpoint_bypass": 0
+  },
+  "production_live_verified": "NOT_VERIFIED",
+  "stage2": "GO-MORE-DATA",
+  "stage3": "GO-MORE-DATA",
+  "countdown": {"fully_passed": "1/10", "remaining_major": 8}
+}
