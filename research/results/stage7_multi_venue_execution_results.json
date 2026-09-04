@@ -1,6 +1,7 @@
 {
-  "stage": "STAGE-7",
-  "verdict": "GO-MORE-DATA",
+  "stage": "STAGE-7.1",
+  "head": "fa017b74bef98cfaa0ebc91b35c288663723164e",
+  "verdict": "PASS",
   "statuses": {
     "venue_abstraction": "PASS",
     "multi_venue_paper": "PASS",
@@ -12,6 +13,15 @@
     "live_boundary": "PASS"
   },
   "duplicate_effects": 0,
+  "determinism": {"n": 20, "unique": 1, "mutation_divergence": true},
+  "ci": {
+    "ci": 33903161603,
+    "regression": 33903161599,
+    "security": 33903161589,
+    "windows": 33903161584,
+    "status": "all_success",
+    "head": "fa017b74bef98cfaa0ebc91b35c288663723164e"
+  },
   "real_broker_e2e": "UNOBSERVABLE",
   "real_capital": "BLOCKED — Stage 10 only",
   "production_semantics_changed": false
