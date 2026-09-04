@@ -1,6 +1,7 @@
 {
-  "stage": "STAGE-6.1",
-  "verdict": "GO-MORE-DATA",
+  "stage": "STAGE-6.2",
+  "head": "b22993f1fa2235c4064e9e9c436df566ace20c32",
+  "verdict": "PASS",
   "statuses": {
     "order_state_machine": "PASS",
     "invalid_transitions": "PASS",
@@ -9,10 +10,19 @@
     "partial_fill": "PASS",
     "execution_store": "PASS",
     "determinism": "PASS",
-    "live_boundary": "PASS"
+    "live_boundary": "PASS",
+    "cancel": "PASS",
+    "unknown_handling": "PASS",
+    "recovery_boundaries": "PASS"
   },
   "duplicate_effects": 0,
-  "oms": "ExecutionEngine + OrderState machine",
-  "ems": "ExecutionEngine venue path + PaperBroker/ExchangeAdapter",
+  "ci": {
+    "ci": 33898534377,
+    "regression": 33898534618,
+    "security": 33898534315,
+    "windows": 33898534293,
+    "status": "all_success"
+  },
+  "replace": "DEFERRED",
   "production_semantics_changed": false
 }

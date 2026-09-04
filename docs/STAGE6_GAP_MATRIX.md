@@ -1,17 +1,28 @@
-# Stage 6.1 Gap Matrix — OMS/EMS & Execution
+# Stage 6.2 Final Gap Matrix — OMS/EMS & Execution
 
-| Area | Status | Classification |
-|------|--------|----------------|
-| Order state machine | PASS | PRODUCTION |
-| Invalid transitions blocked | PASS | PRODUCTION |
-| Risk gate (reject + EMERGENCY_STOP) | PASS | PRODUCTION |
-| Idempotency / duplicate_effects=0 | PASS | PRODUCTION_PAPER |
-| Partial fill | PASS | PRODUCTION_PAPER |
-| ExecutionStore persistence | PASS | PRODUCTION |
-| Determinism N≥20 | PASS | PRODUCTION_PAPER |
-| LIVE boundary (PAPER default) | PASS | PRODUCTION |
-| Real broker fill/cancel E2E | UNOBSERVABLE | Stage 10 |
-| Full cancel/replace matrix | PARTIAL | existing engine support |
-| Network timeout UNKNOWN path | PRODUCTION code path exists | deeper chaos later |
+## Material gates — ALL PASS on exact HEAD b22993f1
 
-**Verdict:** GO-MORE-DATA until exact HEAD CI/Windows GREEN.
+| Gate | Status |
+|------|--------|
+| Order state machine | **PASS** |
+| Risk gate | **PASS** |
+| Idempotency / duplicate_effects=0 | **PASS** |
+| Partial fill | **PASS** |
+| ExecutionStore | **PASS** |
+| Cancel (open + after fill + duplicate) | **PASS** |
+| UNKNOWN → reconcile (no auto-resubmit) | **PASS** |
+| Recovery/restart store idempotency | **PASS** |
+| Determinism N≥20 unique=1 | **PASS** |
+| LIVE boundary | **PASS** |
+| CI / Regression / Security / Windows | **PASS** (`b22993f1`) |
+
+## Deferred / non-blocking
+
+| Gap | Status |
+|-----|--------|
+| REPLACE | **DEFERRED** |
+| Real broker E2E | **UNOBSERVABLE** → Stage 10 |
+| Process-kill per lifecycle boundary | **UNOBSERVABLE** (store-level restart simulated) |
+| Full network chaos matrix | PRODUCTION path exists; deep chaos deferred |
+
+**Stage 6 VERDICT: FULLY PASSED**

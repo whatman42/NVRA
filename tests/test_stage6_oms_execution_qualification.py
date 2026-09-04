@@ -1,4 +1,4 @@
-"""Stage 6.1 — OMS/EMS execution qualification tests."""
+"""Stage 6.1/6.2 — OMS/EMS execution qualification tests."""
 
 from __future__ import annotations
 
@@ -14,6 +14,9 @@ from research.harness.stage6_oms_execution_qualification import (
     qualify_paper_submit_and_idempotency,
     qualify_risk_gate,
     qualify_determinism,
+    qualify_cancel,
+    qualify_unknown_reconcile,
+    qualify_recovery_boundaries,
     run_stage6,
 )
 
@@ -43,3 +46,15 @@ def test_run_stage6_all_pass():
     for k, v in out["statuses"].items():
         assert v == "PASS", (k, v)
     assert out["duplicate_effects"] == 0
+
+
+def test_cancel(tmp_path: Path):
+    assert qualify_cancel(tmp_path).status == "PASS"
+
+
+def test_unknown_handling(tmp_path: Path):
+    assert qualify_unknown_reconcile(tmp_path).status == "PASS"
+
+
+def test_recovery_boundaries(tmp_path: Path):
+    assert qualify_recovery_boundaries(tmp_path).status == "PASS"
