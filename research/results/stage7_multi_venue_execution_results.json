@@ -1,0 +1,18 @@
+{
+  "stage": "STAGE-7",
+  "verdict": "GO-MORE-DATA",
+  "statuses": {
+    "venue_abstraction": "PASS",
+    "multi_venue_paper": "PASS",
+    "precision_constraints": "PASS",
+    "realistic_execution": "PASS",
+    "idempotency": "PASS",
+    "risk_gate": "PASS",
+    "determinism": "PASS",
+    "live_boundary": "PASS"
+  },
+  "duplicate_effects": 0,
+  "real_broker_e2e": "UNOBSERVABLE",
+  "real_capital": "BLOCKED — Stage 10 only",
+  "production_semantics_changed": false
+}
