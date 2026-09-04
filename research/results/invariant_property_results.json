@@ -1,0 +1,11 @@
+{
+  "properties": [
+    {"id": "P1", "inv": "INV-002", "pass": true, "evidence": "E4"},
+    {"id": "P2", "inv": "INV-004", "pass": true, "evidence": "E4"},
+    {"id": "P3", "inv": "INV-003", "pass": true, "evidence": "E2+E4"},
+    {"id": "P4", "inv": "INV-008", "pass": true, "evidence": "E4"},
+    {"id": "P5", "inv": "INV-010", "pass": true, "evidence": "E4", "note": "component; E2E UNOBSERVABLE"},
+    {"id": "P6", "inv": "INV-002-family", "pass": true, "evidence": "E4"},
+    {"id": "P7", "inv": "multi", "pass": true, "evidence": "E4"}
+  ]
+}

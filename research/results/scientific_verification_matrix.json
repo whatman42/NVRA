@@ -1,0 +1,14 @@
+{
+  "verdict": "GO-MORE-DATA",
+  "coverage_pct": 61.1,
+  "matrix": [
+    {"capability": "deterministic_replay_core", "status": "EXISTS", "level": "E4"},
+    {"capability": "full_product_eventbus_replay", "status": "UNOBSERVABLE", "level": "E0"},
+    {"capability": "INV-001_property", "status": "UNOBSERVABLE", "level": "E2"},
+    {"capability": "INV-002_property", "status": "PASS", "level": "E4"},
+    {"capability": "INV-003_property", "status": "PASS", "level": "E2+E4"},
+    {"capability": "INV-004_property", "status": "PASS", "level": "E4"},
+    {"capability": "INV-008_property", "status": "PASS", "level": "E4"},
+    {"capability": "INV-010_property", "status": "COMPONENT_PASS", "level": "E4"}
+  ]
+}
