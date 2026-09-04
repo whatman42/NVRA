@@ -1,0 +1,18 @@
+{
+  "stage": "STAGE-6.1",
+  "verdict": "GO-MORE-DATA",
+  "statuses": {
+    "order_state_machine": "PASS",
+    "invalid_transitions": "PASS",
+    "idempotency": "PASS",
+    "risk_gate": "PASS",
+    "partial_fill": "PASS",
+    "execution_store": "PASS",
+    "determinism": "PASS",
+    "live_boundary": "PASS"
+  },
+  "duplicate_effects": 0,
+  "oms": "ExecutionEngine + OrderState machine",
+  "ems": "ExecutionEngine venue path + PaperBroker/ExchangeAdapter",
+  "production_semantics_changed": false
+}
