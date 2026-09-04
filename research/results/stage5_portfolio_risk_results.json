@@ -1,5 +1,6 @@
 {
-  "stage": "STAGE-5.1",
+  "stage": "STAGE-5.2",
+  "head": "c9206a76a1568dd71a5cd002624572df1bc0a0d8",
   "verdict": "GO-MORE-DATA",
   "statuses": {
     "portfolio_state": "PASS",
@@ -13,7 +14,16 @@
     "agent_ml_boundary": "PASS",
     "cvar_stress": "PASS"
   },
-  "cross_asset": "PARTIAL",
-  "concentration": "POLICY_LIMITS",
+  "ci": {
+    "ci": 33861377443,
+    "regression": 33861377365,
+    "security": 33861377484,
+    "windows": 33861377298
+  },
+  "deferred": {
+    "cvar_es": "DEFERRED non-blocking",
+    "volatility_correlation": "DEFERRED non-blocking",
+    "cross_asset_fx": "GAP deferred"
+  },
   "production_semantics_changed": false
 }

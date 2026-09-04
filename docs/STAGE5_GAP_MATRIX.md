@@ -1,19 +1,39 @@
-# Stage 5.1 Gap Matrix — Institutional Portfolio & Risk
+# Stage 5.2 Final Gap Matrix — Institutional Portfolio & Risk
 
-| Area | Status | Classification |
-|------|--------|----------------|
-| Portfolio state | PASS | PRODUCTION |
-| Exposure | PASS | PRODUCTION |
-| RiskEngine authority | PASS | PRODUCTION |
-| Drawdown | PASS | PRODUCTION |
-| Position sizing | PASS | PRODUCTION (advisory + authority split) |
-| Fail-closed invalid capital | PASS | PRODUCTION |
-| Determinism N≥20 | PASS | PRODUCTION |
-| Dual-stack concordance | PASS | BOUNDARY (not isomorphic; RiskEngine final) |
-| ML/agent boundary INV-003 | PASS | PRODUCTION |
-| CVaR / ES | RESEARCH / GAP | not production authority |
-| Stress scenarios | RESEARCH | chaos_v7 |
-| Cross-asset full multi-currency | PARTIAL / GAP | |
-| Concentration full matrix | POLICY_LIMITS present | |
+## Material gates
 
-**Verdict:** GO-MORE-DATA until exact HEAD CI GREEN.
+| Gate | Status |
+|------|--------|
+| Portfolio state | **PASS** |
+| Exposure deterministic | **PASS** |
+| Sizing authority (advisory → RiskEngine) | **PASS** |
+| Drawdown control | **PASS** |
+| Capital/leverage fail-closed | **PASS** |
+| Determinism N≥20 | **PASS** |
+| Dual-stack boundary (not dual authority) | **PASS** |
+| ML cannot raise ceiling (INV-003) | **PASS** |
+| Invariants preserved | **PASS** |
+| Production semantic regression | **NO** |
+| CI / Regression / Security on `c9206a76` | **PASS** |
+| Windows on `c9206a76` | see final report |
+
+## Materiality decisions (non-blocking)
+
+| Gap | Decision |
+|-----|----------|
+| Production CVaR/ES | **DEFERRED** — not required for Stage 5 minimum; research only |
+| Full portfolio vol/correlation engine | **DEFERRED** — RiskEngine authority sufficient without it |
+| Full multi-currency FX aggregation | **GAP / DEFERRED** — multi-exchange keys exist; no full FX book |
+| Full concentration matrix | **POLICY_LIMITS** scope only |
+
+## Authority matrix (unchanged)
+
+```
+Portfolio analytics / CapitalAdaptive sizing
+        ↓ advisory only
+RiskEngine (crypto)  ← final approval
+        ↓
+ProductionGate / SAFE_MODE / reconciliation
+        ↓
+ExecutionEngine
+```
