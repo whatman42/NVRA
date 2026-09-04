@@ -1,21 +1,17 @@
 {
   "summary": {
-    "stage": "STAGE-2",
+    "stage": "STAGE-2.1",
     "verdict": "GO-MORE-DATA",
     "replay_runs": 100,
     "deterministic_matches": 100,
-    "replay_tests": 13,
     "mismatch_count": 0,
-    "result_hash_equality": true,
-    "state_hash_equality": true,
-    "artifact_hash_equality": true,
-    "invariant_property_pass": 7,
-    "invariant_property_total": 7,
-    "pipeline_coverage_pct": 68.0,
+    "duplicate_effects": 0,
+    "eventbus_worker_handler": "PARTIAL_PASS",
+    "recovery_boundary_matrix": "PASS_B1_B6",
+    "riskengine_roundtrip": "PASS",
+    "executionstore_roundtrip": "PASS",
+    "pipeline_coverage_pct": 78.0,
     "replay_scope": "INTEGRATED_PARTIAL",
-    "eventbus_product_path": "PARTIAL",
-    "orchestration_models": "RESTORED_MINIMAL",
-    "unexplained_nondeterminism": 0,
     "production_changed": false
   }
 }
