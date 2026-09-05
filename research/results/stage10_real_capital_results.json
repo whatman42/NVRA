@@ -1,30 +1,29 @@
 {
   "stage": "STAGE-10",
+  "head": "63727c870d003dbd75706462d90eb69c4e9a9522",
   "verdict": "BLOCKED",
-  "statuses": {
-    "no_automatic_live": "PASS",
-    "production_gate": "PASS",
-    "risk_enforcement": "PASS",
-    "unknown_state_handling": "PASS",
-    "credential_security": "PASS",
-    "tenant_account_isolation": "PASS",
-    "determinism": "PASS",
-    "real_capital_prerequisites": "BLOCKED"
-  },
-  "safety_counters": {
-    "unauthorized_live": 0,
-    "duplicate_effects": 0,
-    "reconciliation_bypass": 0,
-    "safe_mode_escape": 0,
-    "integrity_bypass": 0,
-    "secret_leak": 0,
-    "tenant_boundary_violation": 0,
-    "risk_limit_bypass": 0,
-    "automatic_live_transition": 0,
-    "unknown_state_resubmit": 0,
-    "emergency_stop_bypass": 0
-  },
-  "real_broker_e2e": "BLOCKED",
+  "pre_live": "PASS",
   "real_capital": "BLOCKED",
-  "production_semantics_changed": false
+  "real_order_placed": false,
+  "credentials_used": false,
+  "windows": {
+    "run_id": 33937427462,
+    "artifact_id": 9960916455,
+    "binary": "NVRA.exe",
+    "sha256": "73E647E74866D8C4B828FE5084055CB6F7A117B00CFDBB2DE3B4A8A7CA4B57FF",
+    "headless_paper_20": "PASS",
+    "process_recovery_5": "PASS",
+    "live": false
+  },
+  "ci": {
+    "ci": 33937427439,
+    "regression": 33937427441,
+    "security": 33937427469,
+    "windows": 33937427462,
+    "status": "all_success",
+    "head": "63727c870d003dbd75706462d90eb69c4e9a9522"
+  },
+  "local_tests": {"passed": 1078, "skipped": 1},
+  "safety_counters_all_zero": true,
+  "production_ready": false
 }
