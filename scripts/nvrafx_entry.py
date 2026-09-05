@@ -203,6 +203,39 @@ def _run_headless_autostart() -> int:
         return 1
 
 
+def cmd_diagnose_mt5() -> int:
+    """Import/diagnostic MetaTrader5 inside this runtime. Never places orders. Never enables LIVE."""
+    payload: dict = {
+        "python_module": "missing",
+        "initialize": "not_attempted",
+        "live_authorized": False,
+        "orders": False,
+        "error": "",
+    }
+    try:
+        import MetaTrader5 as mt5  # noqa: F401
+        payload["python_module"] = "available"
+    except ModuleNotFoundError as exc:
+        payload["error"] = f"python_module_missing:{exc}"
+        _cli_write(json.dumps(payload, indent=2) + "\n")
+        return 2
+    except Exception as exc:
+        payload["error"] = f"import_error:{type(exc).__name__}"
+        _cli_write(json.dumps(payload, indent=2) + "\n")
+        return 2
+    try:
+        from god.broker.mt5.adapter import MT5ExecutionAdapter, MT5ConnectionConfig
+        diag = MT5ExecutionAdapter(MT5ConnectionConfig(), mt5_module=None).diagnose()
+        payload.update(diag)
+        payload["live_authorized"] = False
+        payload["orders"] = False
+    except Exception as exc:
+        payload["error"] = f"diagnose_exception:{type(exc).__name__}:{exc}"
+        payload["python_module"] = "available"
+    _cli_write(json.dumps(payload, indent=2) + "\n")
+    return 0 if payload.get("python_module") == "available" else 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="NVRA",
@@ -214,6 +247,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--gui", action="store_true", help="Launch the desktop GUI (optional observer)")
     p.add_argument("--autostart", action="store_true", help="Start autonomous runtime after administrative setup")
     p.add_argument("--headless", action="store_true", help="No GUI (required for production auto-start)")
+    p.add_argument("--diagnose-mt5", action="store_true", help="Diagnose MetaTrader5 package/terminal (no orders)")
     p.add_argument(
         "--help-full",
         action="store_true",
@@ -243,6 +277,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         return cmd_version()
     if args.health:
         return cmd_health()
+    if getattr(args, "diagnose_mt5", False):
+        return cmd_diagnose_mt5()
     if args.check_config:
         return cmd_check_config()
     if args.help_full:
