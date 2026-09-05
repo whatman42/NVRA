@@ -8,7 +8,7 @@ import pytest
 
 
 def test_gui_source_has_client_setup_methods():
-    """Static check so CI without PySide6 still validates the hub surface."""
+    """Static check so CI without display/Qt native libs still validates the hub surface."""
     src = Path("nvra_unified/gui.py").read_text(encoding="utf-8")
     tree = ast.parse(src)
     methods = {
@@ -39,11 +39,33 @@ def test_gui_source_has_client_setup_methods():
 
 
 def test_guard_blocks_when_not_logged_in(tmp_path, monkeypatch):
+    """Runtime GUI guard check — requires a working Qt display stack.
+
+    PySide6 wheels may install on Linux CI while system libs (e.g. libEGL.so.1)
+    are absent; importorskip only covers the pure-Python package, so we must
+    also catch native ImportError and skip rather than fail the whole matrix.
+    """
     monkeypatch.setenv("NVRA_HOME", str(tmp_path))
     pytest.importorskip("PySide6")
-    from PySide6.QtWidgets import QApplication
-    from nvra_unified.runtime import UnifiedRuntime
-    from nvra_unified.gui import NVRAUnifiedWindow
+    try:
+        from PySide6.QtWidgets import QApplication
+        from nvra_unified.runtime import UnifiedRuntime
+        from nvra_unified.gui import NVRAUnifiedWindow
+    except ImportError as exc:
+        # Missing libEGL / libGL / display on headless Linux runners
+        msg = str(exc)
+        if any(
+            token in msg
+            for token in (
+                "libEGL",
+                "libGL",
+                "libOpenGL",
+                "libxcb",
+                "cannot open shared object",
+            )
+        ):
+            pytest.skip(f"Qt native runtime unavailable on this host: {exc}")
+        raise
 
     app = QApplication.instance() or QApplication([])
     rt = UnifiedRuntime()
