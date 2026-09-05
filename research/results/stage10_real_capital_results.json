@@ -1,0 +1,30 @@
+{
+  "stage": "STAGE-10",
+  "verdict": "BLOCKED",
+  "statuses": {
+    "no_automatic_live": "PASS",
+    "production_gate": "PASS",
+    "risk_enforcement": "PASS",
+    "unknown_state_handling": "PASS",
+    "credential_security": "PASS",
+    "tenant_account_isolation": "PASS",
+    "determinism": "PASS",
+    "real_capital_prerequisites": "BLOCKED"
+  },
+  "safety_counters": {
+    "unauthorized_live": 0,
+    "duplicate_effects": 0,
+    "reconciliation_bypass": 0,
+    "safe_mode_escape": 0,
+    "integrity_bypass": 0,
+    "secret_leak": 0,
+    "tenant_boundary_violation": 0,
+    "risk_limit_bypass": 0,
+    "automatic_live_transition": 0,
+    "unknown_state_resubmit": 0,
+    "emergency_stop_bypass": 0
+  },
+  "real_broker_e2e": "BLOCKED",
+  "real_capital": "BLOCKED",
+  "production_semantics_changed": false
+}
