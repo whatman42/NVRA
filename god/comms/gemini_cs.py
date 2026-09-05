@@ -29,8 +29,17 @@ class CSResponse:
 class GeminiCustomerService:
     """Optional Gemini; always safe local fallback."""
 
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY", "").strip()
+    def __init__(self, api_key: Optional[str] = None, secret_store=None):
+        # Priority: explicit arg → SecretStore (keyring) → GEMINI_API_KEY env → local fallback
+        if api_key is not None and str(api_key).strip():
+            self.api_key = str(api_key).strip()
+        elif secret_store is not None:
+            try:
+                self.api_key = (secret_store.gemini_api_key() or "").strip()
+            except Exception:
+                self.api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        else:
+            self.api_key = os.environ.get("GEMINI_API_KEY", "").strip()
         self.enabled = bool(self.api_key)
 
     def _refused(self, user_text: str) -> Optional[str]:
