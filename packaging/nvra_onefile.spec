@@ -12,8 +12,24 @@ hiddenimports = (
     collect_submodules("god")
     + collect_submodules("crypto")
     + collect_submodules("nvra_unified")
+    + [
+        "MetaTrader5",
+        "MetaTrader5.MetaTrader5",
+    ]
 )
-datas = collect_data_files("god") + collect_data_files("crypto") + collect_data_files("nvra_unified")
+# Collect MetaTrader5 package when installed (Windows); no-op on missing.
+try:
+    hiddenimports += collect_submodules("MetaTrader5")
+    datas_mt5 = collect_data_files("MetaTrader5")
+except Exception:
+    datas_mt5 = []
+
+datas = (
+    collect_data_files("god")
+    + collect_data_files("crypto")
+    + collect_data_files("nvra_unified")
+    + datas_mt5
+)
 
 block_cipher = None
 
