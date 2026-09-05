@@ -1,7 +1,6 @@
 """Optional compute providers — selection, fallback, security, validation (no cloud/GPU required)."""
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 
 import pytest
@@ -14,6 +13,8 @@ from god.ml.compute import (
     LocalComputeProvider,
     ProviderStatus,
     TrainingJob,
+    WorkloadType,
+    assert_no_execution_commands,
     assert_no_secrets,
     load_compute_config,
     sanitize_mapping,
@@ -75,20 +76,50 @@ def test_auto_with_cloud_disabled_uses_local():
     assert p.name == "local"
 
 
-def test_auto_prefers_enabled_available_colab():
+def test_auto_prefers_enabled_available_colab_for_heavy():
     cfg = ComputeConfig(provider="auto")
     cfg.colab.enabled = True
     colab = ColabComputeProvider(enabled=True)
     colab._force_status = ProviderStatus.AVAILABLE
-    p = select_provider(cfg, colab=colab)
+    heavy = TrainingJob(model_id="m", workload_type=WorkloadType.HEAVY.value)
+    p = select_provider(cfg, colab=colab, job=heavy)
     assert p.name == "colab"
+
+
+def test_light_workload_always_local_even_if_colab_available():
+    cfg = ComputeConfig(provider="auto")
+    cfg.colab.enabled = True
+    colab = ColabComputeProvider(enabled=True)
+    colab._force_status = ProviderStatus.AVAILABLE
+    light = TrainingJob(model_id="m", workload_type=WorkloadType.LIGHT.value)
+    p = select_provider(cfg, colab=colab, job=light)
+    assert p.name == "local"
+
+
+def test_inference_workload_always_local():
+    cfg = ComputeConfig(provider="colab")
+    cfg.colab.enabled = True
+    colab = ColabComputeProvider(enabled=True)
+    colab._force_status = ProviderStatus.AVAILABLE
+    inf = TrainingJob(model_id="m", workload_type=WorkloadType.INFERENCE.value)
+    p = select_provider(cfg, colab=colab, job=inf)
+    assert p.name == "local"
+
+
+def test_colab_rejects_non_heavy_workload():
+    colab = ColabComputeProvider(enabled=True)
+    colab._force_status = ProviderStatus.AVAILABLE
+    job = TrainingJob(model_id="m", workload_type=WorkloadType.LIGHT.value)
+    result = colab.submit(job, {"rows": 10})
+    assert result.job.status == JobStatus.REJECTED
+    assert "non_heavy" in result.job.metadata.get("reason", "")
 
 
 def test_colab_disconnect_is_interrupted_not_success():
     colab = ColabComputeProvider(enabled=True)
     colab._force_status = ProviderStatus.AVAILABLE
     colab._force_disconnect = True
-    job = TrainingJob(model_id="m1", dataset_hash="abc")
+    job = TrainingJob(model_id="m1", dataset_hash="abc", workload_type=WorkloadType.HEAVY.value)
     result = colab.submit(job, {"dataset_id": "ds1"})
     assert result.job.status == JobStatus.INTERRUPTED
     assert result.job.status != JobStatus.SUCCESS
@@ -98,7 +129,7 @@ def test_kaggle_disconnect_is_interrupted_not_success():
     kaggle = KaggleComputeProvider(enabled=True)
     kaggle._force_status = ProviderStatus.AVAILABLE
     kaggle._force_disconnect = True
-    result = kaggle.submit(TrainingJob(model_id="m1"))
+    result = kaggle.submit(TrainingJob(model_id="m1", workload_type=WorkloadType.HEAVY.value))
     assert result.job.status == JobStatus.INTERRUPTED
 
 
@@ -148,12 +179,58 @@ def test_sanitize_nested_list_tuple_set():
         assert_no_secrets({"metadata": [{"API_TOKEN": "x"}]})
 
 
+def test_execution_command_injection_rejected():
+    with pytest.raises(ValueError, match="execution command"):
+        assert_no_execution_commands({"place_order": {"symbol": "EURUSD"}})
+    with pytest.raises(ValueError, match="execution command"):
+        assert_no_execution_commands({"nested": {"submit_order": 1}})
+    with pytest.raises(ValueError, match="execution command"):
+        assert_no_execution_commands({"bypass_governor": True})
+
+
+def test_colab_rejects_execution_command_payload():
+    colab = ColabComputeProvider(enabled=True)
+    colab._force_status = ProviderStatus.AVAILABLE
+    job = TrainingJob(model_id="m", workload_type=WorkloadType.HEAVY.value)
+    result = colab.submit(job, {"place_order": {"lots": 1}})
+    assert result.job.status == JobStatus.REJECTED
+    assert "execution" in result.job.metadata.get("reason", "").lower() or "rejected_execution" in result.provider_notes
+
+
 def test_job_manifest_rejects_secrets_on_submit(tmp_path: Path):
     local = LocalComputeProvider(artifact_dir=tmp_path)
     job = TrainingJob(model_id="m", metadata={"note": "ok"})
     result = local.submit(job, {"api_token": "secret", "feature": 1})
     assert result.job.status == JobStatus.SUCCESS
     assert "api_token" not in result.job.metadata
+
+
+def test_tenant_id_propagates_to_local_artifact(tmp_path: Path):
+    local = LocalComputeProvider(artifact_dir=tmp_path)
+    job = TrainingJob(model_id="m", tenant_id="tenant-A", dataset_hash="h1")
+    result = local.submit(job, {"rows": 5})
+    assert result.job.status == JobStatus.SUCCESS
+    assert result.job.metadata.get("tenant_id") == "tenant-A"
+    assert result.job.provenance.get("tenant_id") == "tenant-A"
+
+
+def test_job_contract_roundtrip():
+    job = TrainingJob(
+        tenant_id="t1",
+        model_id="m",
+        workload_type=WorkloadType.HEAVY.value,
+        dataset_hash="abc",
+        timeout_sec=120,
+        requested_resources={"gpu": 1},
+        provenance={"src": "unit"},
+    )
+    d = job.to_dict()
+    back = TrainingJob.from_dict(d)
+    assert back.tenant_id == "t1"
+    assert back.workload_type == WorkloadType.HEAVY.value
+    assert back.timeout_sec == 120
+    assert back.requested_resources.get("gpu") == 1
+    assert back.is_heavy()
 
 
 def test_dataset_provenance_matching_pass(tmp_path: Path):
@@ -237,14 +314,19 @@ def test_failure_states_reject_promotion():
         (JobStatus.INTERRUPTED, ("interrupted", "not_success")),
         (JobStatus.UNKNOWN, ()),
         (JobStatus.FAILED, ()),
+        (JobStatus.REJECTED, ()),
     ]:
         colab = ColabComputeProvider(enabled=True)
         colab._force_status = ProviderStatus.AVAILABLE
         if status == JobStatus.INTERRUPTED:
             colab._force_disconnect = True
-            result = colab.submit(TrainingJob(model_id="m", dataset_hash="h"))
+            result = colab.submit(
+                TrainingJob(model_id="m", dataset_hash="h", workload_type=WorkloadType.HEAVY.value)
+            )
         else:
-            result = colab.submit(TrainingJob(model_id="m", dataset_hash="h"))
+            result = colab.submit(
+                TrainingJob(model_id="m", dataset_hash="h", workload_type=WorkloadType.HEAVY.value)
+            )
             result.job.status = status
         v = validate_training_result(result, expected_dataset_hash="h", require_resolvable_artifact=False)
         assert not v.eligible_for_promotion
@@ -266,7 +348,9 @@ def test_registry_promotion_rejects_invalid_compute(tmp_path: Path):
     colab = ColabComputeProvider(enabled=True)
     colab._force_status = ProviderStatus.AVAILABLE
     colab._force_disconnect = True
-    bad = colab.submit(TrainingJob(model_id="m", model_version="1", dataset_hash="h1"))
+    bad = colab.submit(
+        TrainingJob(model_id="m", model_version="1", dataset_hash="h1", workload_type=WorkloadType.HEAVY.value)
+    )
     with pytest.raises(PermissionError, match="compute_validation_rejected"):
         reg.promote_champion("m", "1", training_result=bad, expected_dataset_hash="h1")
 
@@ -312,3 +396,10 @@ def test_cloud_providers_do_not_support_inference_path():
 
 def test_colab_disabled_probe():
     assert ColabComputeProvider(enabled=False).probe().status == ProviderStatus.DISABLED
+
+
+def test_colab_cannot_place_orders():
+    """Structural proof: Colab provider has no order/broker methods."""
+    colab = ColabComputeProvider(enabled=True)
+    for name in ("place_order", "submit_order", "execute_trade", "mt5_order"):
+        assert not hasattr(colab, name)
