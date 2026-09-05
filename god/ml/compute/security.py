@@ -1,4 +1,4 @@
-"""Strip secrets before any cloud/local job manifest leaves the process."""
+"""Strip secrets and reject execution commands before any cloud/local job leaves the process."""
 from __future__ import annotations
 
 from typing import Any, Mapping
@@ -21,12 +21,39 @@ FORBIDDEN_KEY_FRAGMENTS = (
     "windows_credential",
     "keyring",
     "session_cookie",
+    "oauth",
+    "gemini_key",
+    "telegram_token",
+    "bot_token",
+)
+
+# Explicit execution / order-path injection attempts — reject hard.
+EXECUTION_COMMAND_FRAGMENTS = (
+    "place_order",
+    "submit_order",
+    "order_request",
+    "broker_order",
+    "mt5_order",
+    "execute_trade",
+    "live_order",
+    "send_order",
+    "modify_risk",
+    "bypass_governor",
+    "bypass_reconciliation",
+    "promote_execution",
+    "set_live",
+    "enable_live",
 )
 
 
 def _is_forbidden_key(key: str) -> bool:
     k = key.lower().replace("-", "_")
     return any(frag in k for frag in FORBIDDEN_KEY_FRAGMENTS)
+
+
+def _is_execution_command_key(key: str) -> bool:
+    k = key.lower().replace("-", "_")
+    return any(frag in k for frag in EXECUTION_COMMAND_FRAGMENTS)
 
 
 def sanitize_mapping(data: Mapping[str, Any] | None) -> dict[str, Any]:
@@ -49,15 +76,12 @@ def _sanitize_value(value: Any) -> Any:
     if isinstance(value, tuple):
         return tuple(_sanitize_value(item) for item in value)
     if isinstance(value, set):
-        # Sets of mappings become frozenset of tuples of items for hashability is hard;
-        # sanitize members and return a set of sanitized scalars / frozenset markers.
         cleaned = []
         for item in value:
             cleaned.append(_sanitize_value(item))
         try:
             return set(cleaned)
         except TypeError:
-            # unhashable after sanitization (e.g. dict) — return list
             return cleaned
     return value
 
@@ -75,3 +99,29 @@ def assert_no_secrets(data: Any) -> None:
     if isinstance(data, (list, tuple, set)):
         for item in data:
             assert_no_secrets(item)
+
+
+def assert_no_execution_commands(data: Any) -> None:
+    """Raise ValueError if execution/order command keys are present.
+
+    Colab/Kaggle must never receive authority to place orders or modify risk.
+    """
+    if data is None:
+        return
+    if isinstance(data, Mapping):
+        for key, value in data.items():
+            if _is_execution_command_key(str(key)):
+                raise ValueError(f"execution command rejected in compute payload: {key}")
+            assert_no_execution_commands(value)
+        return
+    if isinstance(data, (list, tuple, set)):
+        for item in data:
+            assert_no_execution_commands(item)
+
+
+def sanitize_and_guard(data: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Sanitize secrets then assert no residual secrets or execution commands."""
+    clean = sanitize_mapping(data)
+    assert_no_secrets(clean)
+    assert_no_execution_commands(clean)
+    return clean
