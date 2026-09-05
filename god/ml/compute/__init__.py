@@ -1,14 +1,21 @@
 """Optional multi-provider compute backends (Local / Colab / Kaggle).
 
-Cloud providers are opportunistic accelerators for training/research only.
+Cloud providers are opportunistic accelerators for HEAVY training/research only.
 They never participate in signal, risk, execution, or SAFE_MODE paths.
+LOCAL = trusted execution + inference + risk
+COLAB/KAGGLE = untrusted heavy compute only
 """
 from .base import ComputeProvider
 from .colab import ColabComputeProvider
 from .config import ColabConfig, ComputeConfig, KaggleConfig, LocalConfig, load_compute_config
 from .kaggle import KaggleComputeProvider
 from .local import LocalComputeProvider
-from .security import assert_no_secrets, sanitize_mapping
+from .security import (
+    assert_no_execution_commands,
+    assert_no_secrets,
+    sanitize_and_guard,
+    sanitize_mapping,
+)
 from .selector import select_provider
 from .types import (
     JobStatus,
@@ -16,6 +23,7 @@ from .types import (
     ProviderStatus,
     TrainingJob,
     TrainingResult,
+    WorkloadType,
 )
 from .validation import ArtifactValidationResult, validate_training_result
 
@@ -35,8 +43,11 @@ __all__ = [
     "JobStatus",
     "ProviderStatus",
     "ProviderCapability",
+    "WorkloadType",
     "sanitize_mapping",
+    "sanitize_and_guard",
     "assert_no_secrets",
+    "assert_no_execution_commands",
     "validate_training_result",
     "ArtifactValidationResult",
 ]

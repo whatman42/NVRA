@@ -1,25 +1,32 @@
-"""Google Colab Free — opportunistic optional provider (lazy, never required)."""
+"""Google Colab Free — opportunistic optional provider (lazy, never required).
+
+Security contract:
+- HEAVY training/research only
+- No secrets, no broker credentials, no execution commands
+- Output is untrusted; promotion requires local validation
+- Disconnect / missing session => INTERRUPTED or UNKNOWN, never SUCCESS
+"""
 from __future__ import annotations
 
 from typing import Any, Mapping, Optional
 
 from .base import ComputeProvider
-from .security import assert_no_secrets, sanitize_mapping
+from .security import assert_no_execution_commands, assert_no_secrets, sanitize_mapping
 from .types import (
     JobStatus,
     ProviderCapability,
     ProviderStatus,
     TrainingJob,
     TrainingResult,
+    WorkloadType,
 )
 
 
 def _detect_colab_runtime() -> bool:
-    """True only when actually running inside a Colab kernel. Never import at module load for side effects beyond probe."""
+    """True only when actually running inside a Colab kernel."""
     try:
         import importlib.util
 
-        # google.colab exists only inside Colab; absence is normal.
         return importlib.util.find_spec("google.colab") is not None
     except Exception:
         return False
@@ -33,7 +40,6 @@ class ColabComputeProvider(ComputeProvider):
     def __init__(self, *, enabled: bool = False, opportunistic: bool = True) -> None:
         self.enabled = bool(enabled)
         self.opportunistic = bool(opportunistic)
-        # Test double injection
         self._force_status: Optional[ProviderStatus] = None
         self._force_disconnect: bool = False
 
@@ -60,7 +66,7 @@ class ColabComputeProvider(ComputeProvider):
                 status=ProviderStatus.AVAILABLE,
                 supports_training=True,
                 supports_inference=False,
-                notes=("colab_runtime", "opportunistic"),
+                notes=("colab_runtime", "opportunistic", "heavy_only"),
             )
         return ProviderCapability(
             name=self.name,
@@ -71,10 +77,31 @@ class ColabComputeProvider(ComputeProvider):
         )
 
     def submit(self, job: TrainingJob, payload: Optional[Mapping[str, Any]] = None) -> TrainingResult:
+        # Sanitize first — never let secrets leave process.
         safe = sanitize_mapping(payload)
         assert_no_secrets(safe)
         assert_no_secrets(job.metadata)
+        assert_no_execution_commands(safe)
+        assert_no_execution_commands(job.metadata)
         job.provider = self.name
+
+        # Reject non-heavy workloads on Colab path.
+        if not job.is_heavy():
+            job.status = JobStatus.REJECTED
+            job.metadata = {
+                **job.metadata,
+                "reason": "colab_rejects_non_heavy_workload",
+                "workload_type": job.workload_type,
+            }
+            return TrainingResult(job=job, provider_notes=("rejected_non_heavy",))
+
+        # Reject execution-shaped payloads even after sanitize (defense in depth).
+        try:
+            assert_no_execution_commands(payload)
+        except ValueError as exc:
+            job.status = JobStatus.REJECTED
+            job.metadata = {**job.metadata, "reason": str(exc)}
+            return TrainingResult(job=job, provider_notes=("rejected_execution_command",))
 
         cap = self.probe()
         if cap.status in (ProviderStatus.DISABLED, ProviderStatus.UNAVAILABLE, ProviderStatus.FAILED):
@@ -87,12 +114,20 @@ class ColabComputeProvider(ComputeProvider):
             job.metadata = {**job.metadata, "reason": "session_disconnected"}
             return TrainingResult(job=job, provider_notes=("interrupted", "not_success"))
 
-        # Real Colab execution is out-of-process (notebook). In-process we only mark readiness.
-        # Without an attached session worker, treat as UNKNOWN rather than SUCCESS.
+        # Real Colab execution is out-of-process (notebook worker).
+        # Without an authenticated external session, mark UNKNOWN — never SUCCESS.
         job.status = JobStatus.UNKNOWN
         job.metadata = {
             **job.metadata,
             "reason": "colab_requires_external_session",
             "payload_keys": sorted(safe.keys()),
+            "tenant_id": job.tenant_id,
+            "workload_type": job.workload_type,
         }
-        return TrainingResult(job=job, provider_notes=("external_session_required",))
+        if job.tenant_id:
+            job.provenance = {
+                **job.provenance,
+                "tenant_id": job.tenant_id,
+                "provider": self.name,
+            }
+        return TrainingResult(job=job, provider_notes=("external_session_required", "untrusted_output"))

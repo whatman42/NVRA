@@ -9,7 +9,7 @@ from typing import Any, Mapping, Optional
 from god.ml.hardware import ResourceGovernor, detect_hardware
 
 from .base import ComputeProvider
-from .security import assert_no_secrets, sanitize_mapping
+from .security import assert_no_execution_commands, assert_no_secrets, sanitize_mapping
 from .types import (
     JobStatus,
     ProviderCapability,
@@ -50,6 +50,8 @@ class LocalComputeProvider(ComputeProvider):
         safe = sanitize_mapping(payload)
         assert_no_secrets(safe)
         assert_no_secrets(job.metadata)
+        assert_no_execution_commands(safe)
+        assert_no_execution_commands(job.metadata)
 
         gov = self._governor or ResourceGovernor()
         if not gov.may_start_training():
@@ -61,8 +63,10 @@ class LocalComputeProvider(ComputeProvider):
         job.provider = self.name
         body = {
             "job_id": job.job_id,
+            "tenant_id": job.tenant_id,
             "model_id": job.model_id,
             "model_version": job.model_version,
+            "workload_type": job.workload_type,
             "dataset_hash": job.dataset_hash,
             "training_config_hash": job.training_config_hash,
             "payload": safe,
@@ -86,6 +90,9 @@ class LocalComputeProvider(ComputeProvider):
         meta = {**job.metadata, "artifact_hash": artifact_hash}
         if artifact_path:
             meta["artifact_path"] = artifact_path
+        if job.tenant_id:
+            meta["tenant_id"] = job.tenant_id
+            job.provenance = {**job.provenance, "tenant_id": job.tenant_id, "provider": self.name}
         job.metadata = meta
         return TrainingResult(
             job=job,

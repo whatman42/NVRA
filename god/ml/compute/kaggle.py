@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Optional
 
 from .base import ComputeProvider
-from .security import assert_no_secrets, sanitize_mapping
+from .security import assert_no_execution_commands, assert_no_secrets, sanitize_mapping
 from .types import (
     JobStatus,
     ProviderCapability,
@@ -55,7 +55,7 @@ class KaggleComputeProvider(ComputeProvider):
                 status=ProviderStatus.AVAILABLE,
                 supports_training=True,
                 supports_inference=False,
-                notes=("kaggle_runtime", "opportunistic"),
+                notes=("kaggle_runtime", "opportunistic", "heavy_only"),
             )
         return ProviderCapability(
             name=self.name,
@@ -69,7 +69,25 @@ class KaggleComputeProvider(ComputeProvider):
         safe = sanitize_mapping(payload)
         assert_no_secrets(safe)
         assert_no_secrets(job.metadata)
+        assert_no_execution_commands(safe)
+        assert_no_execution_commands(job.metadata)
         job.provider = self.name
+
+        if not job.is_heavy():
+            job.status = JobStatus.REJECTED
+            job.metadata = {
+                **job.metadata,
+                "reason": "kaggle_rejects_non_heavy_workload",
+                "workload_type": job.workload_type,
+            }
+            return TrainingResult(job=job, provider_notes=("rejected_non_heavy",))
+
+        try:
+            assert_no_execution_commands(payload)
+        except ValueError as exc:
+            job.status = JobStatus.REJECTED
+            job.metadata = {**job.metadata, "reason": str(exc)}
+            return TrainingResult(job=job, provider_notes=("rejected_execution_command",))
 
         cap = self.probe()
         if cap.status in (ProviderStatus.DISABLED, ProviderStatus.UNAVAILABLE, ProviderStatus.FAILED):
@@ -87,5 +105,7 @@ class KaggleComputeProvider(ComputeProvider):
             **job.metadata,
             "reason": "kaggle_requires_external_session",
             "payload_keys": sorted(safe.keys()),
+            "tenant_id": job.tenant_id,
+            "workload_type": job.workload_type,
         }
-        return TrainingResult(job=job, provider_notes=("external_session_required",))
+        return TrainingResult(job=job, provider_notes=("external_session_required", "untrusted_output"))
