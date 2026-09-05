@@ -18,7 +18,6 @@ from .types import (
     ProviderStatus,
     TrainingJob,
     TrainingResult,
-    WorkloadType,
 )
 
 
@@ -79,10 +78,24 @@ class ColabComputeProvider(ComputeProvider):
     def submit(self, job: TrainingJob, payload: Optional[Mapping[str, Any]] = None) -> TrainingResult:
         # Sanitize first — never let secrets leave process.
         safe = sanitize_mapping(payload)
-        assert_no_secrets(safe)
-        assert_no_secrets(job.metadata)
-        assert_no_execution_commands(safe)
-        assert_no_execution_commands(job.metadata)
+        try:
+            assert_no_secrets(safe)
+            assert_no_secrets(job.metadata)
+            assert_no_execution_commands(safe)
+            assert_no_execution_commands(job.metadata)
+            # Also check original payload for execution commands (defense in depth).
+            assert_no_execution_commands(payload)
+        except ValueError as exc:
+            job.status = JobStatus.REJECTED
+            job.provider = self.name
+            job.metadata = {**job.metadata, "reason": str(exc)}
+            note = (
+                "rejected_execution_command"
+                if "execution" in str(exc).lower()
+                else "rejected_secret"
+            )
+            return TrainingResult(job=job, provider_notes=(note,))
+
         job.provider = self.name
 
         # Reject non-heavy workloads on Colab path.
@@ -94,14 +107,6 @@ class ColabComputeProvider(ComputeProvider):
                 "workload_type": job.workload_type,
             }
             return TrainingResult(job=job, provider_notes=("rejected_non_heavy",))
-
-        # Reject execution-shaped payloads even after sanitize (defense in depth).
-        try:
-            assert_no_execution_commands(payload)
-        except ValueError as exc:
-            job.status = JobStatus.REJECTED
-            job.metadata = {**job.metadata, "reason": str(exc)}
-            return TrainingResult(job=job, provider_notes=("rejected_execution_command",))
 
         cap = self.probe()
         if cap.status in (ProviderStatus.DISABLED, ProviderStatus.UNAVAILABLE, ProviderStatus.FAILED):
