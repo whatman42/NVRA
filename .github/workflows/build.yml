@@ -114,6 +114,28 @@ jobs:
           }
           Write-Host "PROCESS_RECOVERY_PASS runs=5 live=false"
 
+      - name: Prove MetaTrader5 embedded in NVRA.exe runtime
+        shell: pwsh
+        run: |
+          python -c "import MetaTrader5; print('HOST_MT5_IMPORT_OK')"
+          $toc = Get-ChildItem -Recurse build -Filter "*.toc" -ErrorAction SilentlyContinue | Select-Object -First 40
+          foreach ($f in $toc) {
+            if (Select-String -Path $f.FullName -Pattern "MetaTrader5" -Quiet) { Write-Host "TOC_HIT $($f.FullName)" }
+          }
+          $p = Start-Process -FilePath ".\\dist\\NVRA.exe" -ArgumentList "--diagnose-mt5" -Wait -PassThru -WindowStyle Hidden -RedirectStandardOutput "mt5_diag_out.txt" -RedirectStandardError "mt5_diag_err.txt"
+          Write-Host "NVRA --diagnose-mt5 ExitCode=$($p.ExitCode)"
+          if (Test-Path mt5_diag_out.txt) { Get-Content mt5_diag_out.txt | Write-Host }
+          if (Test-Path mt5_diag_err.txt) { Get-Content mt5_diag_err.txt | Write-Host }
+          $out = ""
+          if (Test-Path mt5_diag_out.txt) { $out = Get-Content mt5_diag_out.txt -Raw }
+          if ($p.ExitCode -ne 0) { throw "diagnose-mt5 failed exit=$($p.ExitCode)" }
+          if ($out -notmatch "python_module") { throw "diagnose-mt5 missing python_module field" }
+          if ($out -notmatch '"python_module":\s*"available"') {
+            throw "MetaTrader5 NOT available inside NVRA.exe runtime — packaging failed"
+          }
+          if ($out -match '"live_authorized":\s*true') { throw "LIVE must not be authorized by diagnose" }
+          Write-Host "MT5_PACKAGING_PROOF_PASS python_module=available live_authorized=false"
+
       - name: SHA-256
         shell: pwsh
         run: |
