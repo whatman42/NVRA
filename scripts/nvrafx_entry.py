@@ -224,8 +224,8 @@ def cmd_diagnose_mt5() -> int:
         _cli_write(json.dumps(payload, indent=2) + "\n")
         return 2
     try:
-        from god.broker.mt5.adapter import MT5ExecutionAdapter, MT5ConnectionConfig
-        diag = MT5ExecutionAdapter(MT5ConnectionConfig(), mt5_module=None).diagnose()
+        from god.broker.mt5.diagnose_api import diagnose_mt5
+        diag = diagnose_mt5()
         payload.update(diag)
         payload["live_authorized"] = False
         payload["orders"] = False
