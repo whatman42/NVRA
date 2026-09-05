@@ -11,6 +11,8 @@ from PySide6.QtGui import QAction
 from .auth import (
     enrollment_required,
     enroll_first_user,
+    create_account,
+    login as auth_login,
     verify_default_login,
     registration_secret_configured,
 )
@@ -58,7 +60,7 @@ class NVRAUnifiedWindow(QMainWindow):
         self.login_user=QLineEdit(""); self.login_pass=QLineEdit(); self.login_pass.setEchoMode(QLineEdit.Password)
         row.addWidget(QLabel("User")); row.addWidget(self.login_user); row.addWidget(QLabel("Password")); row.addWidget(self.login_pass)
         b=QPushButton("Login"); b.clicked.connect(self.login); row.addWidget(b)
-        self.enroll_btn=QPushButton("First-run Enrollment"); self.enroll_btn.clicked.connect(self.enroll); row.addWidget(self.enroll_btn)
+        self.enroll_btn=QPushButton("Create Account"); self.enroll_btn.setToolTip("First-run local enrollment (offline). No default password."); self.enroll_btn.clicked.connect(self.enroll); row.addWidget(self.enroll_btn)
         google=QPushButton("Sign in with Google"); google.clicked.connect(self.google_login); row.addWidget(google)
         l.addLayout(row)
         mfa=QPushButton("Set up Google Authenticator"); mfa.clicked.connect(self.setup_totp); l.addWidget(mfa)
@@ -143,33 +145,31 @@ class NVRAUnifiedWindow(QMainWindow):
         self.tray.setContextMenu(menu); self.tray.show()
 
     def enroll(self):
-        if not enrollment_required():
-            QMessageBox.information(self, "Already enrolled", "A local operator credential is already enrolled.")
+        """Create Account — first-run local enrollment only."""
+        result = create_account(self.login_user.text(), self.login_pass.text())
+        if result.ok:
+            self.logged_in = False
+            self.login_label.setText("LOCKED — account created; please log in")
+            self.login_pass.clear()
+            QMessageBox.information(self, "Create Account", result.message)
             return
-        username = self.login_user.text().strip()
-        password = self.login_pass.text()
-        if not username or not password:
-            QMessageBox.warning(self, "Enrollment required", "Enter a new username and password first.")
-            return
-        if not enroll_first_user(username, password):
-            QMessageBox.warning(self, "Enrollment failed", "First-run enrollment could not be completed.")
-            return
-        self.login_pass.clear()
-        QMessageBox.information(self, "Enrollment complete", "Operator enrolled. Log in with the new credential.")
+        QMessageBox.warning(self, "Create Account", result.message)
 
     def login(self):
-        if verify_default_login(self.login_user.text(), self.login_pass.text()):
-            self.logged_in=True; self.login_label.setText("AUTHENTICATED — ENROLLED OPERATOR")
+        result = auth_login(self.login_user.text(), self.login_pass.text())
+        if result.ok:
+            self.logged_in = True
+            self.login_label.setText("AUTHENTICATED — ENROLLED OPERATOR")
             self.login_pass.clear()
             self.start_runtime()
-        elif enrollment_required():
-            QMessageBox.warning(self,"Enrollment required","No local operator is enrolled. Complete First-run Enrollment first.")
-        else:
-            QMessageBox.warning(self,"Login failed","Invalid credentials.")
+            return
+        self.logged_in = False
+        self.login_label.setText("LOCKED — login required")
+        QMessageBox.warning(self, "Login failed", result.message)
 
     def google_login(self):
         if enrollment_required():
-            QMessageBox.warning(self, "Enrollment required", "Complete First-run Enrollment before using Google sign-in.")
+            QMessageBox.warning(self, "Enrollment required", "Complete Create Account (first-run enrollment) before using Google sign-in.")
             return
         try:
             client_file = self.config.google_oauth_client_file.strip()
